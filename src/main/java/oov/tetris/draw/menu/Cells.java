@@ -20,15 +20,15 @@ public class Cells extends Drawable implements GameContainer {
     private final int h;
     private final Color borderColor;
 
-    public Cells(int cellW, int cellH, int w, int h, Color borderColor) {
-        this.cellW = cellW;
-        this.cellH = cellH;
-        this.w = w;
-        this.h = h;
-        this.xCapacity = calculateCapacity(w, cellW);
-        this.yCapacity = calculateCapacity(h, cellH);
-        this.borderColor = borderColor;
-    }
+//    public Cells(int cellW, int cellH, int w, int h, Color borderColor) {
+//        this.cellW = cellW;
+//        this.cellH = cellH;
+//        this.w = w;
+//        this.h = h;
+//        this.xCapacity = calculateCapacity(w, cellW);
+//        this.yCapacity = calculateCapacity(h, cellH);
+//        this.borderColor = borderColor;
+//    }
 
     public Cells(int xCapacity, int yCapacity, int w, int h, Color borderColor) {
         this.cellW = w/xCapacity;

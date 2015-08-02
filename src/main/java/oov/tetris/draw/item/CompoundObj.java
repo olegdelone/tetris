@@ -18,7 +18,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     protected BoxPoint[] boxPoints;
 
-    public CompoundObj(int x, int y, Color color, int cellW, int cellH, int xRotationShift) {
+    protected CompoundObj(int x, int y, Color color, int cellW, int cellH, int xRotationShift) {
         this(x, y, color, cellW, cellH);
         this.xRotationShift = xRotationShift;
         this.position.addX(xRotationShift);

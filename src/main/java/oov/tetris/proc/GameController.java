@@ -1,5 +1,6 @@
 package oov.tetris.proc;
 
+import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
@@ -25,6 +26,8 @@ public class GameController {
 
     static final int W = Integer.valueOf(AppProperties.get("field.width"));
     static final int H = Integer.valueOf(AppProperties.get("field.height"));
+    static final int C_X = Integer.valueOf(AppProperties.get("field.capacityX"));
+    static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
 
     private short tick;
@@ -33,7 +36,7 @@ public class GameController {
         return tick;
     }
 
-    CompoundObj compoundObj = new Iobj(3, 4, ChunksFactory.getRandColor(), CELL_W, CELL_H);
+    CompoundObj compoundObj = CompObjFactory.makeRandObj(5,5, 25,25);
 
     public void setAction(int eventCode) {
         if (eventCode == KeyEvent.VK_D) {
@@ -55,14 +58,15 @@ public class GameController {
     public GameController() {
         GameLayout gameLayout = new GameLayout(CW, CH);
 
-        Cells rMenu = new Cells(CELL_W, CELL_H, 100, 100, Color.DARK_GRAY);
+        Cells rMenu = new Cells(4, 4, 100, 100, Color.DARK_GRAY);
         TextMenu lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
-        Cells cells = new Cells(CELL_W, CELL_H, W, H, Color.DARK_GRAY);
+        Cells cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
         gameLayout.setCells(cells);
         gameLayout.setlMenu(lMenu);
         gameLayout.setrMenu(rMenu);
 
         compoundObj.setGameContainer(gameLayout.getCells());
+
 
         RenderEngine.getInstance().add(compoundObj);
         RenderEngine.getInstance().add(gameLayout);
