@@ -54,6 +54,7 @@ public class GameController {
 
     public GameController() {
         GameLayout gameLayout = new GameLayout(CW, CH);
+
         Cells rMenu = new Cells(CELL_W, CELL_H, 100, 100, Color.DARK_GRAY);
         TextMenu lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
         Cells cells = new Cells(CELL_W, CELL_H, W, H, Color.DARK_GRAY);
