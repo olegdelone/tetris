@@ -12,7 +12,7 @@ import java.awt.*;
  * Time: 12:08
  * To change this template use File | Settings | File Templates.
  */
-public class BoxPoint extends Drawable {
+public class BoxPoint extends Drawable implements Cloneable {
     private Color bodyColor;
     private Color innerColor;
     private final int cellW;
@@ -25,6 +25,10 @@ public class BoxPoint extends Drawable {
         this.cellH = cellH;
         this.bodyColor = bodyColor;
         this.innerColor = innerColor;
+    }
+
+    public Point getPoint() {
+        return point;
     }
 
     public int getX(){
@@ -99,4 +103,28 @@ public class BoxPoint extends Drawable {
         return makeBoxPoint(x, --y, color, w, h);
     }
 
+    @Override
+    public BoxPoint clone() throws CloneNotSupportedException {
+        return (BoxPoint)super.clone();
+    }
+
+    @Override
+    public int hashCode() {
+        return point.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj != null && obj instanceof BoxPoint){
+            return point.equals(((BoxPoint) obj).getPoint());
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public String toString() {
+        return "BoxPoint{" +
+                "point=" + point +
+                '}';
+    }
 }

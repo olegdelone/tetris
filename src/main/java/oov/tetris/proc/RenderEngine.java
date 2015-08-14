@@ -43,6 +43,9 @@ public class RenderEngine implements Runnable {
     public boolean remove(Drawable drawable) {
         return drawables.remove(drawable);
     }
+    public boolean removeAll(Collection<? extends Drawable> drawable) {
+        return drawables.removeAll(drawable);
+    }
 
     public Thread stop() {
         if (thread == null) {

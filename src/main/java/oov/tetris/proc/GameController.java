@@ -1,17 +1,13 @@
 package oov.tetris.proc;
 
-import oov.tetris.draw.item.CompObjFactory;
+import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
-import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.draw.item.Iobj;
-import oov.tetris.manager.ChunksFactory;
 import oov.tetris.util.AppProperties;
 import oov.tetris.util.Logger;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 
 /**
  * 07.09.13 18:15: Original version (OOBUKHOV)<br/>
@@ -19,8 +15,8 @@ import java.awt.event.KeyEvent;
 public class GameController {
     private static transient Logger log = Logger.getLogger(GameController.class);
 
-    static final int CELL_W = Integer.valueOf(AppProperties.get("canvas.cell.width"));
-    static final int CELL_H = Integer.valueOf(AppProperties.get("canvas.cell.height"));
+//    static final int CELL_W = Integer.valueOf(AppProperties.get("canvas.cell.width"));
+//    static final int CELL_H = Integer.valueOf(AppProperties.get("canvas.cell.height"));
     static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
     static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
 
@@ -29,30 +25,43 @@ public class GameController {
     static final int C_X = Integer.valueOf(AppProperties.get("field.capacityX"));
     static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
+    private CompoundObj currentObj;
 
+    private BitsPool bitsPool = new BitsPool(C_X, C_Y);
     private short tick;
 
     public short getTick() {
         return tick;
     }
 
-    CompoundObj compoundObj = CompObjFactory.makeRandObj(5,5, 25,25);
+//    CompoundObj compoundObj = CompObjFactory.makeRandObj(5,5, 25,25);
 
-    public void setAction(int eventCode) {
-        if (eventCode == KeyEvent.VK_D) {
-            compoundObj.moveRight();
-        } else if (eventCode == KeyEvent.VK_A) {
-            compoundObj.moveLeft();
-        } else if (eventCode == KeyEvent.VK_W) {
-            compoundObj.moveUp(); // todo for test purposes only
-        } else if (eventCode == KeyEvent.VK_S) {
-            compoundObj.moveDown();
-        } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
-            compoundObj.rotateCW();
-        } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
-            compoundObj.rotateCCW();
-        }
+    public void right(){
+        currentObj.moveRight();
     }
+
+    public void left(){
+        currentObj.moveLeft();
+    }
+
+    public void up(){
+        currentObj.moveUp();
+    }
+
+    public void down(){
+        currentObj.moveDown();
+    }
+    public void rotateCW() {
+        currentObj.rotateCW();
+    }
+
+    public void rotateCCW() {
+        currentObj.rotateCCW();
+    }
+
+//    private boolean checkIsAllowed(CompoundObj currentObj) {
+//        return C_X;
+//    }
 
 
     public GameController() {
@@ -61,19 +70,17 @@ public class GameController {
         Cells rMenu = new Cells(4, 4, 100, 100, Color.DARK_GRAY);
         TextMenu lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
         Cells cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
+
         gameLayout.setCells(cells);
         gameLayout.setlMenu(lMenu);
         gameLayout.setrMenu(rMenu);
-
-        compoundObj.setGameContainer(gameLayout.getCells());
-
-
-        RenderEngine.getInstance().add(compoundObj);
         RenderEngine.getInstance().add(gameLayout);
+
+        currentObj = cells.addNextCurrentObject();
+
     }
 
     public final static int GAME_TIME = 100; // todo level parametrized
-
     public void run() {
 
 //        long timeStart = System.currentTimeMillis();
@@ -91,5 +98,6 @@ public class GameController {
 //            }
 //        }
     }
+
 
 }

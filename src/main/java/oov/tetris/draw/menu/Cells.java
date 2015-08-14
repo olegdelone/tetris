@@ -1,6 +1,9 @@
 package oov.tetris.draw.menu;
 
 import oov.tetris.draw.Drawable;
+import oov.tetris.draw.item.CompObjFactory;
+import oov.tetris.draw.item.CompoundObj;
+import oov.tetris.proc.RenderEngine;
 
 import java.awt.*;
 
@@ -11,7 +14,7 @@ import java.awt.*;
  * Time: 19:29
  * To change this template use File | Settings | File Templates.
  */
-public class Cells extends Drawable implements GameContainer {
+public class Cells extends Drawable implements TetrisControl {
     private final int cellW;
     private final int cellH;
     private final int xCapacity;
@@ -52,6 +55,20 @@ public class Cells extends Drawable implements GameContainer {
         return h;
     }
 
+    public int getxCapacity() {
+        return xCapacity;
+    }
+
+    public int getyCapacity() {
+        return yCapacity;
+    }
+
+    public CompoundObj addNextCurrentObject(){
+        CompoundObj compoundObj = CompObjFactory.makeRandObj(xCapacity >> 1, 0, cellW, cellH);
+        compoundObj.setTetrisControl(this);
+        RenderEngine.getInstance().add(compoundObj);
+        return compoundObj;
+    }
 
     @Override
     public void draw(Graphics g, int sx, int sy) {
@@ -80,7 +97,7 @@ public class Cells extends Drawable implements GameContainer {
     @Override
     public Point getShiftPoint(Drawable drawable) {
 
-        return gameContainer.getShiftPoint(this);
+        return tetrisControl.getShiftPoint(this);
     }
 
 

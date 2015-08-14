@@ -8,7 +8,7 @@ import java.awt.*;
 /**
  * Created by Olegdelone on 25.07.2015.
  */
-public class GameLayout extends Drawable implements GameContainer {
+public class GameLayout extends Drawable implements TetrisControl {
 
     private static transient Logger log = Logger.getLogger(GameLayout.class);
 
@@ -58,7 +58,7 @@ public class GameLayout extends Drawable implements GameContainer {
 
     public void setCells(Cells cells) {
         this.cells = cells;
-        cells.setGameContainer(this);
+        cells.setTetrisControl(this);
 
         int ch = cells.getH();
         int cw = cells.getW();
@@ -75,7 +75,7 @@ public class GameLayout extends Drawable implements GameContainer {
 
     public void setrMenu(Cells rMenu) {
         this.rMenu = rMenu;
-        rMenu.setGameContainer(this);
+        rMenu.setTetrisControl(this);
 
         int hh = centerX>>1;
 
@@ -92,7 +92,7 @@ public class GameLayout extends Drawable implements GameContainer {
 
     public void setlMenu(TextMenu lMenu) {
         this.lMenu = lMenu;
-        lMenu.setGameContainer(this);
+        lMenu.setTetrisControl(this);
 
         int hh = centerX>>1;
 

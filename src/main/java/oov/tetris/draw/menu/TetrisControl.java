@@ -8,6 +8,6 @@ import java.awt.Point;
 /**
  * Created by Olegdelone on 25.07.2015.
  */
-public interface GameContainer {
+public interface TetrisControl {
     Point getShiftPoint(Drawable drawable);
 }

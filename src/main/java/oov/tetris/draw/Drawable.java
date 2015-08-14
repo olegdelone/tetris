@@ -1,6 +1,6 @@
 package oov.tetris.draw;
 
-import oov.tetris.draw.menu.GameContainer;
+import oov.tetris.draw.menu.TetrisControl;
 
 import java.awt.*;
 
@@ -12,19 +12,19 @@ import java.awt.*;
  * To change this template use File | Settings | File Templates.
  */
 public abstract class Drawable {
-    protected GameContainer gameContainer;
+    protected TetrisControl tetrisControl;
     private final static Point ZERO_POINT = new Point(0, 0);
     private Point cachedPoint;
 
-    public void setGameContainer(GameContainer gameContainer) {
-        this.gameContainer = gameContainer;
+    public void setTetrisControl(TetrisControl tetrisControl) {
+        this.tetrisControl = tetrisControl;
     }
 
     public void draw(Graphics g) {
         int sx, sy;
         Point point;
         if (cachedPoint == null) {
-            if (gameContainer != null && (point = gameContainer.getShiftPoint(this)) != null) {
+            if (tetrisControl != null && (point = tetrisControl.getShiftPoint(this)) != null) {
                 cachedPoint = point;
             } else {
                 cachedPoint = ZERO_POINT;

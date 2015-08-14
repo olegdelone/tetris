@@ -36,11 +36,20 @@ public class Play {
             @Override
             public boolean dispatchKeyEvent(KeyEvent e) {
                 if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    int keyCode = e.getKeyCode();
+                    int eventCode = e.getKeyCode();
 //                    log.info("key = {}", keyCode);
-                    try {
-                        gameController.setAction(keyCode);
-                    } catch (IllegalArgumentException ignored) {
+                    if (eventCode == KeyEvent.VK_D) {
+                        gameController.right();
+                    } else if (eventCode == KeyEvent.VK_A) {
+                        gameController.left();
+                    } else if (eventCode == KeyEvent.VK_W) {
+                        gameController.up(); // todo for test purposes only
+                    } else if (eventCode == KeyEvent.VK_S) {
+                        gameController.down();
+                    } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
+                        gameController.rotateCW();
+                    } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
+                        gameController.rotateCCW();
                     }
                 }
                 return true;
@@ -81,7 +90,7 @@ public class Play {
             public void onEvent(Collection<Drawable> drawables) {
                 reset();
                 Graphics graphics = image.getGraphics();
-                synchronized (drawables){
+                synchronized (drawables) {
                     for (Drawable drawable : drawables) {
                         drawable.draw(graphics);
                     }
