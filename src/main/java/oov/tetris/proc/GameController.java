@@ -1,5 +1,6 @@
 package oov.tetris.proc;
 
+import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
@@ -15,7 +16,7 @@ import java.awt.*;
 public class GameController {
     private static transient Logger log = Logger.getLogger(GameController.class);
 
-//    static final int CELL_W = Integer.valueOf(AppProperties.get("canvas.cell.width"));
+    //    static final int CELL_W = Integer.valueOf(AppProperties.get("canvas.cell.width"));
 //    static final int CELL_H = Integer.valueOf(AppProperties.get("canvas.cell.height"));
     static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
     static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
@@ -26,7 +27,7 @@ public class GameController {
     static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
     private CompoundObj currentObj;
-
+    Cells cells;
     private BitsPool bitsPool = new BitsPool(C_X, C_Y);
     private short tick;
 
@@ -36,27 +37,79 @@ public class GameController {
 
 //    CompoundObj compoundObj = CompObjFactory.makeRandObj(5,5, 25,25);
 
-    public void right(){
-        currentObj.moveRight();
+    public void right() {
+        BoxPoint cursor = currentObj.getCursor();
+        if (cursor.getX() + currentObj.getxGap() < C_X - 1) {
+            currentObj.moveRight();
+        }
     }
 
-    public void left(){
-        currentObj.moveLeft();
+    public void left() {
+        BoxPoint cursor = currentObj.getCursor();
+        if (cursor.getX() > 0) {
+            currentObj.moveLeft();
+        }
     }
 
-    public void up(){
-        currentObj.moveUp();
+    public void up() {
+        BoxPoint cursor = currentObj.getCursor();
+        if (cursor.getY() > 0) {
+            currentObj.moveUp();
+        }
     }
 
-    public void down(){
-        currentObj.moveDown();
+    public void down() {
+        BoxPoint cursor = currentObj.getCursor();
+        if (cursor.getY() < C_Y - 1) {
+            currentObj.moveDown();
+        }
     }
+
     public void rotateCW() {
-        currentObj.rotateCW();
+        BoxPoint cursor = currentObj.getCursor();
+        int x_ = cursor.getX() + currentObj.getyGap() - (C_X - 1);
+        if (x_ > 0) {
+            try {
+                CompoundObj cloned = currentObj.clone();
+//                log.debug("cloned: {}", cloned);
+                cloned.rotateCW();
+//                log.debug("cloned&rotated: {}", cloned);
+                cloned.moveLeft(x_);
+//                log.debug("cloned&rotated&moved: {}", cloned);
+                if (!bitsPool.checkInPool(cloned)) {
+                    currentObj.moveLeft(x_);
+                    currentObj.rotateCW();
+                }
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            currentObj.rotateCW();
+        }
     }
 
     public void rotateCCW() {
-        currentObj.rotateCCW();
+        BoxPoint cursor = currentObj.getCursor();
+        int x_ = cursor.getX();
+        if (x_ < 0) {
+            x_ = Math.abs(x_);
+            try {
+                CompoundObj cloned = currentObj.clone();
+                log.debug("cloned: {}", cloned);
+                cloned.rotateCCW();
+                log.debug("cloned&rotated: {}", cloned);
+                cloned.moveRight(x_);
+                log.debug("cloned&rotated&moved: {}", cloned);
+                if (!bitsPool.checkInPool(cloned)) {
+                    currentObj.moveRight(x_);
+                    currentObj.rotateCCW();
+                }
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            currentObj.rotateCCW();
+        }
     }
 
 //    private boolean checkIsAllowed(CompoundObj currentObj) {
@@ -69,7 +122,7 @@ public class GameController {
 
         Cells rMenu = new Cells(4, 4, 100, 100, Color.DARK_GRAY);
         TextMenu lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
-        Cells cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
+        cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
 
         gameLayout.setCells(cells);
         gameLayout.setlMenu(lMenu);
@@ -81,6 +134,7 @@ public class GameController {
     }
 
     public final static int GAME_TIME = 100; // todo level parametrized
+
     public void run() {
 
 //        long timeStart = System.currentTimeMillis();

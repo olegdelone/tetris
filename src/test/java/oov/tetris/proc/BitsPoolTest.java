@@ -72,8 +72,7 @@ public class BitsPoolTest {
         Assert.assertTrue(!bitsPool.checkInPool(1, 0));
 
 
-        List<Integer> integers = bitsPool.eraseLines();
-        log.info("erased: {}", integers);
+        bitsPool.eraseLines();
         log.info("{}", bitsPool);
 
 
@@ -234,6 +233,12 @@ public class BitsPoolTest {
         BPool1 bPool1 = new BPool1(xCap,yCap);
         Map<Integer, Integer> m = new HashMap<Integer, Integer>();
         bPool1.setM(m);
+
+        for (int i = 0; i < yCap; i++) {
+            bPool1.put(new BoxPoint(i, i, null, null, 0, 0));
+        }
+        bPool1.reset();
+
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {

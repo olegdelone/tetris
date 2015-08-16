@@ -17,7 +17,7 @@ public class BoxPoint extends Drawable implements Cloneable {
     private Color innerColor;
     private final int cellW;
     private final int cellH;
-    private final Point point;
+    private Point point;
 
     public BoxPoint(int x, int y, Color bodyColor, Color innerColor, int cellW, int cellH) {
         this.point = new Point(x, y);
@@ -105,7 +105,9 @@ public class BoxPoint extends Drawable implements Cloneable {
 
     @Override
     public BoxPoint clone() throws CloneNotSupportedException {
-        return (BoxPoint)super.clone();
+        BoxPoint r = (BoxPoint)super.clone();
+        r.point = (Point)point.clone();
+        return r;
     }
 
     @Override

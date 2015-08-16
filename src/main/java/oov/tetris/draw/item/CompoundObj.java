@@ -189,21 +189,21 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
     @Override
     public void moveLeft() {
 //        Cells cells = (Cells) tetrisControl;
-        if (cursor.getX() > 0) {
+//        if (cursor.getX() > 0) {
             moveLeft(1);
-        }
+//        }
     }
 
 
     @Override
     public void moveRight() {
-        Cells cells = (Cells) tetrisControl;
-        if (cursor.getX() + getxGap() < cells.getxCapacity() - 1) {
+//        Cells cells = (Cells) tetrisControl;
+//        if (cursor.getX() + getxGap() < cells.getxCapacity() - 1) {
             moveRight(1);
-        }
+//        }
     }
 
-    private void moveDown(int steps) {
+    public void moveDown(int steps) {
         cursor.addY(steps);
         rotationPoint.addY(steps);
         for (BoxPoint boxPoint : boxPoints) {
@@ -211,7 +211,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         }
     }
 
-    private void moveLeft(int steps) {
+    public void moveLeft(int steps) {
         cursor.addX(-steps);
         rotationPoint.addX(-steps);
         for (BoxPoint boxPoint : boxPoints) {
@@ -219,7 +219,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         }
     }
 
-    private void moveRight(int steps) {
+    public void moveRight(int steps) {
         cursor.addX(steps);
         rotationPoint.addX(steps);
         for (BoxPoint boxPoint : boxPoints) {
@@ -227,7 +227,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         }
     }
 
-    private void moveUp(int steps) {
+    public void moveUp(int steps) {
         cursor.addY(-steps);
         rotationPoint.addY(-steps);
         for (BoxPoint boxPoint : boxPoints) {
