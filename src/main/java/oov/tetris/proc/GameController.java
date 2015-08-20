@@ -5,6 +5,9 @@ import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
+import oov.tetris.proc.command.CtrlCommand;
+import oov.tetris.proc.command.RotateCCWCommand;
+import oov.tetris.proc.command.RotateCWCommand;
 import oov.tetris.util.AppProperties;
 import oov.tetris.util.Logger;
 
@@ -66,50 +69,13 @@ public class GameController {
     }
 
     public void rotateCW() {
-        BoxPoint cursor = currentObj.getCursor();
-        int x_ = cursor.getX() + currentObj.getyGap() - (C_X - 1);
-        if (x_ > 0) {
-            try {
-                CompoundObj cloned = currentObj.clone();
-//                log.debug("cloned: {}", cloned);
-                cloned.rotateCW();
-//                log.debug("cloned&rotated: {}", cloned);
-                cloned.moveLeft(x_);
-//                log.debug("cloned&rotated&moved: {}", cloned);
-                if (!bitsPool.checkInPool(cloned)) {
-                    currentObj.moveLeft(x_);
-                    currentObj.rotateCW();
-                }
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            currentObj.rotateCW();
-        }
+        CtrlCommand command = new RotateCWCommand(bitsPool,currentObj,C_X);
+        command.execute();
     }
 
     public void rotateCCW() {
-        BoxPoint cursor = currentObj.getCursor();
-        int x_ = cursor.getX();
-        if (x_ < 0) {
-            x_ = Math.abs(x_);
-            try {
-                CompoundObj cloned = currentObj.clone();
-                log.debug("cloned: {}", cloned);
-                cloned.rotateCCW();
-                log.debug("cloned&rotated: {}", cloned);
-                cloned.moveRight(x_);
-                log.debug("cloned&rotated&moved: {}", cloned);
-                if (!bitsPool.checkInPool(cloned)) {
-                    currentObj.moveRight(x_);
-                    currentObj.rotateCCW();
-                }
-            } catch (CloneNotSupportedException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            currentObj.rotateCCW();
-        }
+        CtrlCommand command = new RotateCCWCommand(bitsPool,currentObj,C_X);
+        command.execute();
     }
 
 //    private boolean checkIsAllowed(CompoundObj currentObj) {

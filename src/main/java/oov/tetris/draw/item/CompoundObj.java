@@ -1,12 +1,12 @@
 package oov.tetris.draw.item;
 
-import oov.tetris.draw.*;
-import oov.tetris.draw.menu.Cells;
+import oov.tetris.draw.BoxPoint;
+import oov.tetris.draw.Drawable;
+import oov.tetris.draw.Moveable;
+import oov.tetris.draw.Rotateable;
 import oov.tetris.util.Logger;
 
 import java.awt.*;
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Created by Olegdelone on 22.07.2015.
@@ -33,7 +33,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
     }
 
 
-
     public CompoundObj(int x, int y, Color color, int cellW, int cellH) {
         this(x, y, color, cellW, cellH, 0);
     }
@@ -50,23 +49,19 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 //    }
 
 
-    public BoxPoint getCursor() {
-        return cursor;
-    }
-
     private void swapGaps() {
 
         int tmp = getxGap();
         xGap = getyGap();
         yGap = tmp;
-        log.debug("Swapped => x: {}; y: {}",xGap, yGap);
+        log.debug("Swapped => x: {}; y: {}", xGap, yGap);
 
     }
 
     protected void initGaps() {
         int x = getxGap();
         int y = getyGap();
-        log.debug("init gaps: x {}; y {};", x ,y);
+        log.debug("init gaps: x {}; y {};", x, y);
     }
 
     public int getxGap() {
@@ -79,7 +74,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
                     maxX = boxPoint.getX();
                 }
             }
-            xGap = maxX -  cursor.getX();
+            xGap = maxX - cursor.getX();
         }
         return xGap;
     }
@@ -105,7 +100,7 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
             boxPoint.draw(g, x, y);
         }
         cursor.draw(g, x, y);
-//        rotationPoint.draw(g, x, y);
+        rotationPoint.draw(g, x, y);
     }
 
     @Override
@@ -188,19 +183,13 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     @Override
     public void moveLeft() {
-//        Cells cells = (Cells) tetrisControl;
-//        if (cursor.getX() > 0) {
-            moveLeft(1);
-//        }
+        moveLeft(1);
     }
 
 
     @Override
     public void moveRight() {
-//        Cells cells = (Cells) tetrisControl;
-//        if (cursor.getX() + getxGap() < cells.getxCapacity() - 1) {
-            moveRight(1);
-//        }
+        moveRight(1);
     }
 
     public void moveDown(int steps) {
@@ -241,22 +230,16 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         }
     }
 
-    public BoxPoint[] getBoxPoints() {
-        return boxPoints;
-    }
 
 
     public void dispose() {
-//        RenderEngine engine = RenderEngine.getInstance();
-//        engine.remove(rotationPoint);
-//        engine.remove(cursor);
         rotationPoint = null;
         cursor = null;
     }
 
     @Override
     public CompoundObj clone() throws CloneNotSupportedException {
-        CompoundObj r =  (CompoundObj)super.clone();
+        CompoundObj r = (CompoundObj) super.clone();
         BoxPoint[] boxPointsCloned = new BoxPoint[boxPoints.length];
         for (int i = 0; i < boxPoints.length; i++) {
             boxPointsCloned[i] = boxPoints[i].clone();
@@ -271,15 +254,15 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
     public String toString() {
         StringBuilder sb = new StringBuilder("CompObj_").append("{");
         sb.append("\n--->");
-        for (int i = cursor.getX(); i <= cursor.getX() + xGap; sb.append("(").append(i++).append(")"));
+        for (int i = cursor.getX(); i <= cursor.getX() + xGap; sb.append("(").append(i++).append(")")) ;
         sb.append("\n");
-        for (int j = cursor.getY()-yGap; j <= cursor.getY(); j++) {
+        for (int j = cursor.getY() - yGap; j <= cursor.getY(); j++) {
 
             sb.append("(").append(j).append(") ");
             for (int i = cursor.getX(); i <= cursor.getX() + xGap; i++) {
                 BoxPoint found = null;
                 for (BoxPoint boxPoint : boxPoints) {
-                    if(boxPoint.getY() == j && boxPoint.getX() == i){
+                    if (boxPoint.getY() == j && boxPoint.getX() == i) {
                         found = boxPoint;
                         break;
                     }
@@ -290,5 +273,23 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
             sb.append("\n");
         }
         return sb.append("}").toString();
+    }
+
+    public int getxRotationShift() {
+        return xRotationShift;
+    }
+
+    public int getOrigRPX() {
+        return rotationPoint.getX()-xRotationShift;
+    }
+
+
+    public BoxPoint getCursor() {
+        return cursor;
+    }
+
+
+    public BoxPoint[] getBoxPoints() {
+        return boxPoints;
     }
 }
