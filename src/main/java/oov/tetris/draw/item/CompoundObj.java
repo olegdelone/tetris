@@ -15,27 +15,19 @@ import java.awt.*;
 public abstract class CompoundObj extends Drawable implements Moveable, Rotateable, Cloneable {
     private static transient Logger log = Logger.getLogger(CompoundObj.class);
 
-    private int xRotationShift;
-    protected BoxPoint cursor; // bottomLeft
-    protected BoxPoint rotationPoint;
+    protected BoxPoint cursor;
 
     protected BoxPoint[] boxPoints;
 
     private int xGap = -1;
     private int yGap = -1;
 
-    protected CompoundObj(int x, int y, Color color, int cellW, int cellH, int xRotationShift) {
+    protected CompoundObj(int x, int y, Color color, int cellW, int cellH) {
         boxPoints = obtainFigure(x, y, color, cellW, cellH);
-        this.xRotationShift = xRotationShift;
-        this.rotationPoint = BoxPoint.makeBoxPoint(x + xRotationShift, y, Color.CYAN, cellW, cellH);
         this.cursor = BoxPoint.makeBoxPoint(x, y, Color.PINK, cellW, cellH);
         initGaps();
     }
 
-
-    public CompoundObj(int x, int y, Color color, int cellW, int cellH) {
-        this(x, y, color, cellW, cellH, 0);
-    }
 
     protected abstract BoxPoint[] obtainFigure(int x, int y, Color color, int cellW, int cellH);
 
@@ -49,8 +41,10 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 //    }
 
 
-    private void swapGaps() {
-
+    protected boolean isFlat(){
+        return getxGap()>getyGap();
+    }
+    protected void swapGaps() {
         int tmp = getxGap();
         xGap = getyGap();
         yGap = tmp;
@@ -67,14 +61,15 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
     public int getxGap() {
         if (xGap == -1) {
             BoxPoint[] arr = boxPoints;
-            int maxX = arr[0].getX();
+            int minX = arr[0].getX();
             for (int i = 1, l = arr.length; i < l; i++) {
                 BoxPoint boxPoint = arr[i];
-                if (boxPoint.getX() > maxX) {
-                    maxX = boxPoint.getX();
+                int x = boxPoint.getX();
+                if (minX > x) {
+                    minX = x;
                 }
             }
-            xGap = maxX - cursor.getX();
+            xGap = cursor.getX() - minX;
         }
         return xGap;
     }
@@ -99,24 +94,22 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         for (BoxPoint boxPoint : boxPoints) {
             boxPoint.draw(g, x, y);
         }
-        cursor.draw(g, x, y);
-        rotationPoint.draw(g, x, y);
+//        cursor.draw(g, x, y);
     }
 
     @Override
-    public void rotateCW() {
+    public void rotateCCW() {
         int maxDy = 0;
-
-        int rx = rotationPoint.getX();
-        int ry = rotationPoint.getY();
+        int rx = cursor.getX();
+        int ry = cursor.getY();
         for (BoxPoint boxPoint : boxPoints) {
-            int deltaX = boxPoint.getX() - rx;
-            int deltaY = boxPoint.getY() - ry;
+            int deltaX = - boxPoint.getX() + rx;
+            int deltaY =  - boxPoint.getY() + ry;
 
             boxPoint.setX(rx - deltaY);
             boxPoint.setY(ry + deltaX);
 
-            deltaY = boxPoint.getY() - ry;// - xRotationShift;
+            deltaY = boxPoint.getY() - ry;
 
             if (maxDy < deltaY) {
                 maxDy = deltaY;
@@ -126,46 +119,34 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
             for (BoxPoint boxPoint : boxPoints) {
                 boxPoint.addY(-maxDy);
             }
-            cursor.addX(xRotationShift);
-        } else {
-            for (BoxPoint boxPoint : boxPoints) {
-                boxPoint.addX(-xRotationShift);
-            }
-            cursor.addX(-xRotationShift);
         }
         swapGaps();
     }
 
 
     @Override
-    public void rotateCCW() {
-        int minDx = 0;
-        int rx = rotationPoint.getX();
-        int ry = rotationPoint.getY();
+    public void rotateCW() {
+        int maxDx = 0;
+        int rx = cursor.getX();
+        int ry = cursor.getY();
         for (BoxPoint boxPoint : boxPoints) {
-            int deltaX = boxPoint.getX() - rx;
-            int deltaY = boxPoint.getY() - ry;
+            int deltaX = -boxPoint.getX() + rx;
+            int deltaY = - boxPoint.getY() + ry;
 
             boxPoint.setX(rx + deltaY);
             boxPoint.setY(ry - deltaX);
 
             deltaX = boxPoint.getX() - rx;
 
-            if (minDx > deltaX) {
-                minDx = deltaX;
+            if (maxDx < deltaX) {
+                maxDx = deltaX;
             }
         }
 
-        if ((minDx) < 0) {
+        if ((maxDx) > 0) {
             for (BoxPoint boxPoint : boxPoints) {
-                boxPoint.addX(-minDx - xRotationShift);
+                boxPoint.addX(-maxDx);
             }
-            cursor.addX(-xRotationShift);
-        } else {
-            for (BoxPoint boxPoint : boxPoints) {
-                boxPoint.addY(-xRotationShift);
-            }
-            cursor.addX(xRotationShift);
         }
         swapGaps();
     }
@@ -194,7 +175,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     public void moveDown(int steps) {
         cursor.addY(steps);
-        rotationPoint.addY(steps);
         for (BoxPoint boxPoint : boxPoints) {
             boxPoint.addY(steps);
         }
@@ -202,7 +182,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     public void moveLeft(int steps) {
         cursor.addX(-steps);
-        rotationPoint.addX(-steps);
         for (BoxPoint boxPoint : boxPoints) {
             boxPoint.addX(-steps);
         }
@@ -210,7 +189,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     public void moveRight(int steps) {
         cursor.addX(steps);
-        rotationPoint.addX(steps);
         for (BoxPoint boxPoint : boxPoints) {
             boxPoint.addX(steps);
         }
@@ -218,7 +196,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     public void moveUp(int steps) {
         cursor.addY(-steps);
-        rotationPoint.addY(-steps);
         for (BoxPoint boxPoint : boxPoints) {
             boxPoint.addY(-steps);
         }
@@ -233,7 +210,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
 
     public void dispose() {
-        rotationPoint = null;
         cursor = null;
     }
 
@@ -246,7 +222,6 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         }
         r.boxPoints = boxPointsCloned;
         r.cursor = cursor.clone();
-        r.rotationPoint = rotationPoint.clone();
         return r;
     }
 
@@ -254,12 +229,12 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
     public String toString() {
         StringBuilder sb = new StringBuilder("CompObj_").append("{");
         sb.append("\n--->");
-        for (int i = cursor.getX(); i <= cursor.getX() + xGap; sb.append("(").append(i++).append(")")) ;
+        for (int i = cursor.getX()- xGap; i <= cursor.getX(); sb.append("(").append(i++).append(")")) ;
         sb.append("\n");
         for (int j = cursor.getY() - yGap; j <= cursor.getY(); j++) {
 
             sb.append("(").append(j).append(") ");
-            for (int i = cursor.getX(); i <= cursor.getX() + xGap; i++) {
+            for (int i = cursor.getX()-xGap; i <= cursor.getX(); i++) {
                 BoxPoint found = null;
                 for (BoxPoint boxPoint : boxPoints) {
                     if (boxPoint.getY() == j && boxPoint.getX() == i) {
@@ -275,12 +250,9 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
         return sb.append("}").toString();
     }
 
-    public int getxRotationShift() {
-        return xRotationShift;
-    }
 
-    public int getOrigRPX() {
-        return rotationPoint.getX()-xRotationShift;
+    public int getOrigCPX() {
+        return cursor.getX();
     }
 
 

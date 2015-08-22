@@ -17,9 +17,9 @@ public class Zobj extends CompoundObj {
     protected BoxPoint[] obtainFigure(int x, int y, Color color, int cellW, int cellH) {
         BoxPoint d;
         return new BoxPoint[]{d = BoxPoint.makeBoxPoint(x, y, color, cellW, cellH),
+                d = BoxPoint.makeBoxLefter(d.getX(), d.getY(), color, cellW, cellH),
                 d = BoxPoint.makeBoxUpper(d.getX(), d.getY(), color, cellW, cellH),
-                d = BoxPoint.makeBoxRighter(d.getX(), d.getY(), color, cellW, cellH),
-                BoxPoint.makeBoxUpper(d.getX(), d.getY(), color, cellW, cellH),
+                BoxPoint.makeBoxLefter(d.getX(), d.getY(), color, cellW, cellH),
         };
     }
 }

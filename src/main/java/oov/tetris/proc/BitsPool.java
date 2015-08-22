@@ -157,13 +157,15 @@ public class BitsPool {
         int y = compoundObj.getCursor().getY() + 1;
         for (int i = y - yGap; i <= y; i++) {
             Map<Integer, BoxPoint> boxPoints = baskets.get(i);
-            for (int j = x; j <= x + xGap; j++) {
-                BoxPoint boxPoint = boxPoints.get(j);
-                if (boxPoint != null) {
-                    for (BoxPoint point : compoundObj.getBoxPoints()) {
-                        if (boxPoint.getX() == point.getX() && boxPoint.getY() == point.getY() + 1) {
-                            point.setInnerColor(Color.WHITE);
-                            return true;
+            if(boxPoints != null) {
+                for (int j = x - xGap; j <= x; j++) {
+                    BoxPoint boxPoint = boxPoints.get(j);
+                    if (boxPoint != null) {
+                        for (BoxPoint point : compoundObj.getBoxPoints()) {
+                            if (boxPoint.getX() == point.getX() && boxPoint.getY() == point.getY() + 1) {
+                                point.setInnerColor(Color.WHITE);
+                                return true;
+                            }
                         }
                     }
                 }
@@ -175,7 +177,7 @@ public class BitsPool {
     public boolean checkGapsClash(int xGap, int yGap, int x, int y) {
         for (int i = y - yGap; i <= y; i++) {
             Map<Integer, BoxPoint> boxPoints = baskets.get(i);
-            for (int j = x; j <= x + xGap; j++) {
+            for (int j = x - xGap; j <= xGap; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
                     log.debug("boxPoint: {}", boxPoint);

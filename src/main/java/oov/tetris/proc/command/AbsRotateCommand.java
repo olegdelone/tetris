@@ -10,9 +10,9 @@ import oov.tetris.util.Logger;
 public abstract class AbsRotateCommand implements CtrlCommand {
     private static transient Logger log = Logger.getLogger(AbsRotateCommand.class);
 
-    private BitsPool bitsPool;
-    private CompoundObj compoundObj;
-    private int cx;
+    private final BitsPool bitsPool;
+    private final CompoundObj compoundObj;
+    private final int cx;
 
     public AbsRotateCommand(BitsPool bitsPool, CompoundObj compoundObj, int cx) {
         this.bitsPool = bitsPool;
@@ -24,8 +24,8 @@ public abstract class AbsRotateCommand implements CtrlCommand {
 
     @Override
     public void execute() {
-        int rpx = compoundObj.getOrigRPX();
-        int x_ = rpx + compoundObj.getyGap() - (cx - 1);
+        int rpx = compoundObj.getOrigCPX();
+        int x_ = rpx - (cx - 1);
         if (x_ > 0) {
             log.debug("x_: {}", x_);
             CompoundObj cloned;
@@ -42,10 +42,8 @@ public abstract class AbsRotateCommand implements CtrlCommand {
             if (!bitsPool.checkInPool(cloned)) {
                 compoundObj.moveLeft(x_);
                 originalAction(compoundObj);
-//                originalAction(compoundObj);
             }
-
-        } else if ((x_ = rpx) < 0) {
+        } else if ((x_ = rpx - compoundObj.getxGap() - compoundObj.getyGap()) < 0) {
             log.debug("x_: {}", x_);
             x_ = -x_;
             CompoundObj cloned;
@@ -63,7 +61,6 @@ public abstract class AbsRotateCommand implements CtrlCommand {
                 compoundObj.moveRight(x_);
                 originalAction(compoundObj);
             }
-
         } else {
             originalAction(compoundObj);
         }

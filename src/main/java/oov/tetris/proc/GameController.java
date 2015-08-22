@@ -1,11 +1,13 @@
 package oov.tetris.proc;
 
 import oov.tetris.draw.BoxPoint;
+import oov.tetris.draw.ObjPutListener;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
 import oov.tetris.proc.command.CtrlCommand;
+import oov.tetris.proc.command.MoveDownCommand;
 import oov.tetris.proc.command.RotateCCWCommand;
 import oov.tetris.proc.command.RotateCWCommand;
 import oov.tetris.util.AppProperties;
@@ -42,14 +44,14 @@ public class GameController {
 
     public void right() {
         BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getX() + currentObj.getxGap() < C_X - 1) {
+        if (cursor.getX() < C_X - 1) {
             currentObj.moveRight();
         }
     }
 
     public void left() {
         BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getX() > 0) {
+        if (cursor.getX() - currentObj.getxGap() > 0) {
             currentObj.moveLeft();
         }
     }
@@ -62,10 +64,14 @@ public class GameController {
     }
 
     public void down() {
-        BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getY() < C_Y - 1) {
-            currentObj.moveDown();
-        }
+        CtrlCommand command = new MoveDownCommand(bitsPool, currentObj, C_Y, new ObjPutListener() {
+            @Override
+            public void onEvent(CompoundObj compoundObj) {
+                log.debug("onEventCalled");
+                currentObj = cells.addNextCurrentObject();
+            }
+        });
+        command.execute();
     }
 
     public void rotateCW() {
