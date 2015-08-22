@@ -1,5 +1,6 @@
 package oov.tetris.proc.command;
 
+import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.proc.BitsPool;
 import oov.tetris.util.Logger;
@@ -26,6 +27,13 @@ public abstract class AbsRotateCommand implements CtrlCommand {
     public void execute() {
         int rpx = compoundObj.getOrigCPX();
         int x_ = rpx - (cx - 1);
+
+        BoxPoint cursor = compoundObj.getCursor();
+        int cx = cursor.getX();
+        int cy = cursor.getY();
+        int xGap = compoundObj.getxGap();
+        int yGap = compoundObj.getyGap();
+
         if (x_ > 0) {
             log.debug("x_: {}", x_);
             CompoundObj cloned;
@@ -43,7 +51,7 @@ public abstract class AbsRotateCommand implements CtrlCommand {
                 compoundObj.moveLeft(x_);
                 originalAction(compoundObj);
             }
-        } else if ((x_ = rpx - compoundObj.getxGap() - compoundObj.getyGap()) < 0) {
+        } else if ((x_ = rpx - yGap) < 0) {
             log.debug("x_: {}", x_);
             x_ = -x_;
             CompoundObj cloned;
@@ -62,7 +70,9 @@ public abstract class AbsRotateCommand implements CtrlCommand {
                 originalAction(compoundObj);
             }
         } else {
-            originalAction(compoundObj);
+            if(!bitsPool.checkGapsClash(yGap,xGap,rpx,cy)){
+                originalAction(compoundObj);
+            }
         }
     }
 }

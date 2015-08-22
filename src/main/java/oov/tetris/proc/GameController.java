@@ -6,10 +6,7 @@ import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
-import oov.tetris.proc.command.CtrlCommand;
-import oov.tetris.proc.command.MoveDownCommand;
-import oov.tetris.proc.command.RotateCCWCommand;
-import oov.tetris.proc.command.RotateCWCommand;
+import oov.tetris.proc.command.*;
 import oov.tetris.util.AppProperties;
 import oov.tetris.util.Logger;
 
@@ -21,8 +18,6 @@ import java.awt.*;
 public class GameController {
     private static transient Logger log = Logger.getLogger(GameController.class);
 
-    //    static final int CELL_W = Integer.valueOf(AppProperties.get("canvas.cell.width"));
-//    static final int CELL_H = Integer.valueOf(AppProperties.get("canvas.cell.height"));
     static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
     static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
 
@@ -32,7 +27,9 @@ public class GameController {
     static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
     private CompoundObj currentObj;
-    Cells cells;
+    private final Cells cells;
+    private final TextMenu lMenu;
+
     private BitsPool bitsPool = new BitsPool(C_X, C_Y);
     private short tick;
 
@@ -40,20 +37,14 @@ public class GameController {
         return tick;
     }
 
-//    CompoundObj compoundObj = CompObjFactory.makeRandObj(5,5, 25,25);
-
     public void right() {
-        BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getX() < C_X - 1) {
-            currentObj.moveRight();
-        }
+        CtrlCommand command = new MoveRightCommand(bitsPool,currentObj,C_X);
+        command.execute();
     }
 
     public void left() {
-        BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getX() - currentObj.getxGap() > 0) {
-            currentObj.moveLeft();
-        }
+        CtrlCommand command = new MoveLeftCommand(bitsPool,currentObj,C_X);
+        command.execute();
     }
 
     public void up() {
@@ -68,10 +59,24 @@ public class GameController {
             @Override
             public void onEvent(CompoundObj compoundObj) {
                 log.debug("onEventCalled");
+                int linesCnt = bitsPool.eraseLines();
+                if(linesCnt > 0){
+                    lMenu.addScores(calcScores(linesCnt));
+                }
                 currentObj = cells.addNextCurrentObject();
             }
         });
         command.execute();
+    }
+
+    private static int calcScores(int a){
+        if(a<=0){
+            throw new IllegalArgumentException("arg a<=0");
+        }
+        if(a == 1){
+            return 100;
+        }
+        return 2*calcScores(--a) + 100;
     }
 
     public void rotateCW() {
@@ -93,7 +98,7 @@ public class GameController {
         GameLayout gameLayout = new GameLayout(CW, CH);
 
         Cells rMenu = new Cells(4, 4, 100, 100, Color.DARK_GRAY);
-        TextMenu lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
+        lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
         cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
 
         gameLayout.setCells(cells);

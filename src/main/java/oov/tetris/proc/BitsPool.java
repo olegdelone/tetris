@@ -72,6 +72,11 @@ public class BitsPool {
                 tmpTop[i++] = boxPoints;
                 log.debug("line {} moved to tmp", y);
             } else {
+                if(boxPoints != null){
+                    for (BoxPoint boxPoint : boxPoints.values()) {
+                        boxPoint.addY(stepsDown);
+                    }
+                }
                 baskets.put(y + stepsDown, boxPoints);
                 log.debug("line {} shifted to {}", y, y + stepsDown);
             }
@@ -87,9 +92,9 @@ public class BitsPool {
         for (int i = yCap - 1; i >= 0; i--) {
 
             Map<Integer, BoxPoint> boxPoints = baskets.get(i);
-//            if (boxPoints == null || boxPoints.isEmpty()) { // todo
-//                break;
-//            }
+            if (boxPoints == null || boxPoints.isEmpty()) { // todo
+                break;
+            }
             if (xCap == boxPoints.size()) {
                 if (r == Collections.EMPTY_LIST) {
                     r = new ArrayList<Integer>(2);
@@ -105,14 +110,15 @@ public class BitsPool {
                 }
             }
         }
-//        log.info("gotten next bunch: {}", r);
+        log.info("gotten next bunch: {}", r);
         return r;
     }
 
-    public void eraseLines() {
+    public int eraseLines() {
         List<Integer> r;
+        int result = 0;
         while ((r = getNextBunch()) != Collections.EMPTY_LIST) {
-            for (int i = 0; i < r.size(); i++) {
+            for (int i = 0; i < r.size(); i++, ++result) {
                 Integer y = r.get(i);
                 Map<Integer, BoxPoint> boxPoints = baskets.get(y);
                 if (boxPoints != null) {
@@ -124,6 +130,7 @@ public class BitsPool {
                 }
             }
         }
+        return result;
     }
 
     public boolean checkInPool(CompoundObj compoundObj) {
@@ -177,7 +184,10 @@ public class BitsPool {
     public boolean checkGapsClash(int xGap, int yGap, int x, int y) {
         for (int i = y - yGap; i <= y; i++) {
             Map<Integer, BoxPoint> boxPoints = baskets.get(i);
-            for (int j = x - xGap; j <= xGap; j++) {
+            if(boxPoints == null){
+                continue;
+            }
+            for (int j = x - xGap; j <= x; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
                     log.debug("boxPoint: {}", boxPoint);

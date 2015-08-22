@@ -91,9 +91,9 @@ public abstract class CompoundObj extends Drawable implements Moveable, Rotateab
 
     @Override
     public void draw(Graphics g, int x, int y) {
-        for (BoxPoint boxPoint : boxPoints) {
-            boxPoint.draw(g, x, y);
-        }
+//        for (BoxPoint boxPoint : boxPoints) {
+//            boxPoint.draw(g, x, y);
+//        }
 //        cursor.draw(g, x, y);
     }
 

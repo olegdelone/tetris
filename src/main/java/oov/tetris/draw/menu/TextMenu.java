@@ -55,6 +55,9 @@ public class TextMenu extends Drawable {
     public void setScores(int scores) {
         this.scores = scores;
     }
+    public void addScores(int scores) {
+        this.scores += scores;
+    }
 
     public void setLevel(int level) {
         this.level = level;

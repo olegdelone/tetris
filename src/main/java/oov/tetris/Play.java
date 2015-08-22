@@ -38,18 +38,20 @@ public class Play {
                 if (e.getID() == KeyEvent.KEY_PRESSED) {
                     int eventCode = e.getKeyCode();
 //                    log.info("key = {}", keyCode);
-                    if (eventCode == KeyEvent.VK_D) {
-                        gameController.right();
-                    } else if (eventCode == KeyEvent.VK_A) {
-                        gameController.left();
-                    } else if (eventCode == KeyEvent.VK_W) {
-                        gameController.up(); // todo for test purposes only
-                    } else if (eventCode == KeyEvent.VK_S) {
-                        gameController.down();
-                    } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
-                        gameController.rotateCW();
-                    } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
-                        gameController.rotateCCW();
+                    synchronized (RenderEngine.getInstance()){
+                        if (eventCode == KeyEvent.VK_D) {
+                            gameController.right();
+                        } else if (eventCode == KeyEvent.VK_A) {
+                            gameController.left();
+                        } else if (eventCode == KeyEvent.VK_W) {
+                            gameController.up(); // todo for test purposes only
+                        } else if (eventCode == KeyEvent.VK_S) {
+                            gameController.down();
+                        } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
+                            gameController.rotateCW();
+                        } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
+                            gameController.rotateCCW();
+                        }
                     }
                 }
                 return true;

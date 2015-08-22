@@ -1,5 +1,6 @@
 package oov.tetris.draw.menu;
 
+import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.Drawable;
 import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
@@ -65,8 +66,10 @@ public class Cells extends Drawable implements TetrisControl {
 
     public CompoundObj addNextCurrentObject(){
         CompoundObj compoundObj = CompObjFactory.makeRandObj(xCapacity >> 1, 0, cellW, cellH);
-        compoundObj.setTetrisControl(this);
-        RenderEngine.getInstance().add(compoundObj);
+        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
+            boxPoint.setTetrisControl(this);
+            RenderEngine.getInstance().add(boxPoint);
+        }
         return compoundObj;
     }
 
