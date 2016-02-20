@@ -42,21 +42,13 @@ public class Logger {
             l = Level.valueOf(prop.toUpperCase());
         }
         level = l;
-//        log(Level.INFO, Logger.class, "Level is set: {}", level);
         log.info("Level is set: {}", level);
     }
 
     enum Level {
-        DEBUG(1), INFO(2), WARNING(3), ERROR(4);
-
-        private final int ordinal;
-
-        Level(int ordinal) {
-            this.ordinal = ordinal;
-        }
-
+        DEBUG, INFO, WARNING, ERROR;
         public static boolean checkLevel(Level l) {
-            return l.ordinal >= level.ordinal;
+            return l.ordinal() >= level.ordinal();
         }
     }
 

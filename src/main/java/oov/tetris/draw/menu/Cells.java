@@ -18,21 +18,19 @@ import java.awt.*;
 public class Cells extends Drawable implements TetrisControl {
     private final int cellW;
     private final int cellH;
-    private final int xCapacity;
+    protected final int xCapacity;
     private final int yCapacity;
     private final int w;
     private final int h;
     private final Color borderColor;
 
-//    public Cells(int cellW, int cellH, int w, int h, Color borderColor) {
-//        this.cellW = cellW;
-//        this.cellH = cellH;
-//        this.w = w;
-//        this.h = h;
-//        this.xCapacity = calculateCapacity(w, cellW);
-//        this.yCapacity = calculateCapacity(h, cellH);
-//        this.borderColor = borderColor;
-//    }
+    public int getCellW() {
+        return cellW;
+    }
+
+    public int getCellH() {
+        return cellH;
+    }
 
     public Cells(int xCapacity, int yCapacity, int w, int h, Color borderColor) {
         this.cellW = w/xCapacity;
@@ -44,10 +42,6 @@ public class Cells extends Drawable implements TetrisControl {
         this.borderColor = borderColor;
     }
 
-    public int calculateCapacity(int dimension, int cellD) {
-        return dimension / cellD;
-    }
-
     public int getW() {
         return w;
     }
@@ -56,22 +50,15 @@ public class Cells extends Drawable implements TetrisControl {
         return h;
     }
 
-    public int getxCapacity() {
-        return xCapacity;
-    }
-
-    public int getyCapacity() {
-        return yCapacity;
-    }
-
-    public CompoundObj addNextCurrentObject(){
-        CompoundObj compoundObj = CompObjFactory.makeRandObj(xCapacity >> 1, 0, cellW, cellH);
+    public void addNextCurrentObject(CompoundObj compoundObj){
         for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
             boxPoint.setTetrisControl(this);
             RenderEngine.getInstance().add(boxPoint);
         }
-        return compoundObj;
+        compoundObj.getCursor().setTetrisControl(this);
     }
+
+
 
     @Override
     public void draw(Graphics g, int sx, int sy) {

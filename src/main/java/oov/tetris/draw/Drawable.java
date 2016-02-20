@@ -18,6 +18,7 @@ public abstract class Drawable {
 
     public void setTetrisControl(TetrisControl tetrisControl) {
         this.tetrisControl = tetrisControl;
+        cachedPoint = null;
     }
 
     public void draw(Graphics g) {

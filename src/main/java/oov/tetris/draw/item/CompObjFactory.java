@@ -57,8 +57,8 @@ public class CompObjFactory {
     }
 
     public static CompoundObj makeRandObj(int x, int y, int cellW, int cellH) {
-//        PART p = PART.getRand();
-        PART p = PART.I;
+        PART p = PART.getRand();
+//        PART p = PART.I;
         return makeRandColorObj(x, y, cellW, cellH, p);
     }
 }

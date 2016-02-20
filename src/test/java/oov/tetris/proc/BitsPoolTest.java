@@ -71,11 +71,8 @@ public class BitsPoolTest {
         Assert.assertTrue(bitsPool.checkInPool(0, 0));
         Assert.assertTrue(!bitsPool.checkInPool(1, 0));
 
-
         bitsPool.eraseLines();
         log.info("{}", bitsPool);
-
-
     }
 
     @Test

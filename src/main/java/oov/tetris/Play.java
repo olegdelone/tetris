@@ -17,6 +17,7 @@ import java.util.Collection;
  */
 public class Play {
 
+    private static volatile boolean paused = false;
     private static transient Logger log = Logger.getLogger(Play.class);
 
     public static final int w = Integer.valueOf(AppProperties.get("canvas.width"));
@@ -29,60 +30,118 @@ public class Play {
         initComponents();
         initRenderCallback();
 
+        RenderEngine re = RenderEngine.getInstance();
+
         final GameController gameController = new GameController();
 
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher(new KeyEventDispatcher() {
-            @Override
-            public boolean dispatchKeyEvent(KeyEvent e) {
-                if (e.getID() == KeyEvent.KEY_PRESSED) {
-                    int eventCode = e.getKeyCode();
-//                    log.info("key = {}", keyCode);
-                    synchronized (RenderEngine.getInstance()){
-                        if (eventCode == KeyEvent.VK_D) {
-                            gameController.right();
-                        } else if (eventCode == KeyEvent.VK_A) {
-                            gameController.left();
-                        } else if (eventCode == KeyEvent.VK_W) {
-                            gameController.up(); // todo for test purposes only
-                        } else if (eventCode == KeyEvent.VK_S) {
-                            gameController.down();
-                        } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
-                            gameController.rotateCW();
-                        } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
-                            gameController.rotateCCW();
+        manager.addKeyEventDispatcher(e -> {
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                int eventCode = e.getKeyCode();
+                synchronized (re) {
+                    if (eventCode == KeyEvent.VK_P) {
+                        paused = !paused;
+                        if (!paused) {
+                            log.debug("notifying...");
+                            re.notify();
                         }
                     }
+                    if (paused) {
+                        return false;
+                    }
+                    if (eventCode == KeyEvent.VK_D) {
+                        gameController.right();
+                    } else if (eventCode == KeyEvent.VK_A) {
+                        gameController.left();
+                    } else if (eventCode == KeyEvent.VK_W) {
+                        gameController.up(); // todo for test purposes only
+                    } else if (eventCode == KeyEvent.VK_S) {
+                        gameController.down();
+                    } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
+                        gameController.rotateCW();
+                    } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
+                        gameController.rotateCCW();
+                    }
                 }
-                return true;
             }
+            return true;
         });
-//        reset();
-//        render();
 
+        int tick = 0;
+        long timeStart = System.currentTimeMillis();
 
-        try {
-            gameController.run();
-        } catch (IllegalStateException e) {
-            Thread thread = RenderEngine.getInstance().stop();
-            try {
-                if (thread.isAlive()) {
-                    log.info("joining to the thread...");
-                    thread.join();
-                    log.info("join released...");
+        while (true) {
+            while (paused) {
+                synchronized (re) {
+                    try {
+                        log.debug("on waiting...");
+                        re.wait();
+                        log.debug("awaking...");
+                    } catch (InterruptedException e) {
+                        shutdown();
+                        return;
+                    }
                 }
-            } catch (InterruptedException e1) {
-                log.warn("join interrupted.", e1);
             }
-            RenderEngine.getInstance().fullRender();
-            log.error("e: ", e);
-            Color bgColor = Color.WHITE;
-            Graphics gr = image.getGraphics();
-            gr.setColor(bgColor);
-            gr.drawString("Game over", w >> 1, h >> 1);
-            render();
+            long timeCurrent = System.currentTimeMillis();
+
+            if (timeCurrent - timeStart >= GAME_TIME) {
+                if (++tick % 3 == 0) {
+                    gameController.down();
+                }
+                timeStart = timeCurrent;
+            }
+
         }
 
+//        try {
+//        } catch (IllegalStateException e) {
+//            Thread thread = RenderEngine.getInstance().stop();
+//            try {
+//                if (thread.isAlive()) {
+//                    log.info("joining to the thread...");
+//                    thread.join();
+//                    log.info("join released...");
+//                }
+//            } catch (InterruptedException e1) {
+//                log.warn("join interrupted.", e1);
+//            }
+//            RenderEngine.getInstance().fullRender();
+//            log.error("e: ", e);
+//            Color bgColor = Color.WHITE;
+//            Graphics gr = image.getGraphics();
+//            gr.setColor(bgColor);
+//            gr.drawString("Game over", w >> 1, h >> 1);
+//            render();
+//        }
+
+    }
+
+    public static void overTheGame() {
+        paused = true;
+        RenderEngine.getInstance().add(new Drawable() {
+            @Override
+            public void draw(Graphics g, int x, int y) {
+                Color bgColor = Color.WHITE;
+                Graphics gr = image.getGraphics();
+                gr.setColor(bgColor);
+                gr.drawString("Game over", w >> 1, h >> 1);
+            }
+        });
+    }
+
+    private static void shutdown() {
+        log.info("shutting down");
+        Thread thread = RenderEngine.getInstance().stop();
+        try {
+            if (thread.isAlive()) {
+                log.info("joining to the thread...");
+                thread.join();
+                log.info("join released...");
+            }
+        } catch (InterruptedException e1) {
+            log.warn("join interrupted.", e1);
+        }
     }
 
     private static void initRenderCallback() {
@@ -131,5 +190,11 @@ public class Play {
         Graphics gr = image.getGraphics();
         gr.setColor(bgColor);
         gr.fillRect(0, 0, w, h);
+    }
+
+    public final static int GAME_TIME = 100; // todo level parametrized
+
+    private static void heart() {
+
     }
 }

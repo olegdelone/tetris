@@ -14,12 +14,10 @@ public class MoveLeftCommand implements CtrlCommand {
 
     private final BitsPool bitsPool;
     private final CompoundObj compoundObj;
-    private final int cx;
 
-    public MoveLeftCommand(BitsPool bitsPool, CompoundObj compoundObj, int cx) {
+    public MoveLeftCommand(BitsPool bitsPool, CompoundObj compoundObj) {
         this.bitsPool = bitsPool;
         this.compoundObj = compoundObj;
-        this.cx = cx;
     }
 
     @Override

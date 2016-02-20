@@ -1,14 +1,18 @@
 package oov.tetris.proc;
 
+import oov.tetris.Play;
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.ObjPutListener;
+import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
+import oov.tetris.draw.menu.CellsPlayground;
 import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
 import oov.tetris.proc.command.*;
 import oov.tetris.util.AppProperties;
 import oov.tetris.util.Logger;
+import oov.tetris.util.ScoresUtils;
 
 import java.awt.*;
 
@@ -20,7 +24,6 @@ public class GameController {
 
     static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
     static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
-
     static final int W = Integer.valueOf(AppProperties.get("field.width"));
     static final int H = Integer.valueOf(AppProperties.get("field.height"));
     static final int C_X = Integer.valueOf(AppProperties.get("field.capacityX"));
@@ -29,21 +32,18 @@ public class GameController {
     private CompoundObj currentObj;
     private final Cells cells;
     private final TextMenu lMenu;
+    private final ChunksStackManager chunksStackManager;
 
     private BitsPool bitsPool = new BitsPool(C_X, C_Y);
-    private short tick;
 
-    public short getTick() {
-        return tick;
-    }
 
     public void right() {
-        CtrlCommand command = new MoveRightCommand(bitsPool,currentObj,C_X);
+        CtrlCommand command = new MoveRightCommand(bitsPool, currentObj, C_X);
         command.execute();
     }
 
     public void left() {
-        CtrlCommand command = new MoveLeftCommand(bitsPool,currentObj,C_X);
+        CtrlCommand command = new MoveLeftCommand(bitsPool, currentObj);
         command.execute();
     }
 
@@ -55,80 +55,63 @@ public class GameController {
     }
 
     public void down() {
-        CtrlCommand command = new MoveDownCommand(bitsPool, currentObj, C_Y, new ObjPutListener() {
-            @Override
-            public void onEvent(CompoundObj compoundObj) {
-                log.debug("onEventCalled");
-                int linesCnt = bitsPool.eraseLines();
-                if(linesCnt > 0){
-                    lMenu.addScores(calcScores(linesCnt));
-                }
-                currentObj = cells.addNextCurrentObject();
+        CtrlCommand command = new MoveDownCommand(bitsPool, currentObj, C_Y, compoundObj -> {
+            log.debug("onEventCalled");
+//            log.info("co: {}", compoundObj);
+//            if(compoundObj.getCursor().getY() == 0){
+//                Play.overTheGame();
+//                return;
+//                // todo game over
+//            }
+            int linesCnt = bitsPool.eraseLines();
+            if (linesCnt > 0) {
+                lMenu.addScores(ScoresUtils.calcAndGetScores(linesCnt));
             }
+            currentObj = chunksStackManager.pop();
+            log.debug("obj: {}", currentObj);
+
+            log.debug("obj: {}", currentObj);
+
+            // todo cellw cellH
+            cells.addNextCurrentObject(currentObj);
         });
         command.execute();
     }
 
-    private static int calcScores(int a){
-        if(a<=0){
-            throw new IllegalArgumentException("arg a<=0");
-        }
-        if(a == 1){
-            return 100;
-        }
-        return 2*calcScores(--a) + 100;
-    }
-
     public void rotateCW() {
-        CtrlCommand command = new RotateCWCommand(bitsPool,currentObj,C_X);
+        CtrlCommand command = new RotateCWCommand(bitsPool, currentObj, C_X);
         command.execute();
+
     }
 
     public void rotateCCW() {
-        CtrlCommand command = new RotateCCWCommand(bitsPool,currentObj,C_X);
+        CtrlCommand command = new RotateCCWCommand(bitsPool, currentObj, C_X);
         command.execute();
     }
-
-//    private boolean checkIsAllowed(CompoundObj currentObj) {
-//        return C_X;
-//    }
-
 
     public GameController() {
         GameLayout gameLayout = new GameLayout(CW, CH);
 
         Cells rMenu = new Cells(4, 4, 100, 100, Color.DARK_GRAY);
+        chunksStackManager = new ChunksStackManager(rMenu, 2);
+
         lMenu = new TextMenu(150, 100, Color.DARK_GRAY);
-        cells = new Cells(C_X, C_Y, W, H, Color.DARK_GRAY);
+        cells = new CellsPlayground(C_X, C_Y, W, H, Color.DARK_GRAY);
 
         gameLayout.setCells(cells);
         gameLayout.setlMenu(lMenu);
         gameLayout.setrMenu(rMenu);
         RenderEngine.getInstance().add(gameLayout);
 
-        currentObj = cells.addNextCurrentObject();
+        currentObj = chunksStackManager.pop();
+//        currentObj.moveTo(C_X >> 1, 0);
+        // todo cellw cellH
+        cells.addNextCurrentObject(currentObj);
 
     }
 
-    public final static int GAME_TIME = 100; // todo level parametrized
 
-    public void run() {
 
-//        long timeStart = System.currentTimeMillis();
-//
-//        while (true) {
-//            long timeCurrent = System.currentTimeMillis();
-//
-//            if (timeCurrent - timeStart >= GAME_TIME) {
-//                if (++tick % 3 == 0) {
-//
-//
-//
-//                }
-//                timeStart = timeCurrent;
-//            }
-//        }
-    }
 
 
 }

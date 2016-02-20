@@ -50,4 +50,19 @@ public class Ascii {
         r = Logger.compactPackage((short) 30, (short) 35, OverriddenComponent.class);
         log.info("r = {} ", r);
     }
+
+    public void ttt(){
+        String r = Logger.compactPackage((short) 8, (short) 8, OverriddenComponent.class);
+        log.info("r = {} ", r);
+        r = Logger.compactPackage((short) 8, (short) 9, OverriddenComponent.class);
+        log.info("r = {} ", r);
+        r = Logger.compactPackage((short) 8, (short) 10, OverriddenComponent.class);
+        log.info("r = {} ", r);
+        r = Logger.compactPackage((short) 10, (short) 12, OverriddenComponent.class);
+        log.info("r = {} ", r);
+        r = Logger.compactPackage((short) 10, (short) 15, OverriddenComponent.class);
+        log.info("r = {} ", r);
+        r = Logger.compactPackage((short) 30, (short) 35, OverriddenComponent.class);
+        log.info("r = {} ", r);
+    }
 }

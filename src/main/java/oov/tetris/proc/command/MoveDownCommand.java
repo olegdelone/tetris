@@ -6,6 +6,9 @@ import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.proc.BitsPool;
 import oov.tetris.util.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by olegdelone on 22.08.2015.
  */
@@ -39,6 +42,7 @@ public class MoveDownCommand implements CtrlCommand {
                 throw new RuntimeException(e);
             }
             cloned.moveDown();
+
             if(bitsPool.checkInPool(cloned)){
                 bitsPool.put(compoundObj);
                 objPutListener.onEvent(compoundObj);

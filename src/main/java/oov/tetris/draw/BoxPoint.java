@@ -57,6 +57,9 @@ public class BoxPoint extends Drawable implements Cloneable {
 
     @Override
     public void draw(Graphics g, int sx, int sy) {
+        if(point.y < 0){
+            return;
+        }
         g.setColor(borderColor);
         int x = point.x*cellW + sx+1;
         int y = point.y*cellH + sy+1;
