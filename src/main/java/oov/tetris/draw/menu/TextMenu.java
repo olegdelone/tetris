@@ -4,9 +4,7 @@ import oov.tetris.draw.Drawable;
 
 import java.awt.*;
 
-/**
- * Created by Olegdelone on 25.07.2015.
- */
+
 public class TextMenu extends Drawable {
 
     private int scores;
@@ -45,22 +43,17 @@ public class TextMenu extends Drawable {
         g.drawLine(x,y,x,y+h);
         g.drawLine(x+w,y,x+w,y+h);
 
-        if(paused){
+        if(paused) {
             g.setColor(Color.RED);
             g.drawString("<Paused>", x+xMid, y+3*yMid);
         }
     }
 
-
-    public void setScores(int scores) {
-        this.scores = scores;
-    }
     public void addScores(int scores) {
         this.scores += scores;
     }
-
-    public void setLevel(int level) {
-        this.level = level;
+    public void nextLevel() {
+        this.level++;
     }
 
     public void setPaused(boolean paused) {

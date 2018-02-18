@@ -8,13 +8,7 @@ import oov.tetris.proc.RenderEngine;
 
 import java.awt.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Olezha
- * Date: 08.08.14
- * Time: 19:29
- * To change this template use File | Settings | File Templates.
- */
+
 public class Cells extends Drawable implements TetrisControl {
     private final int cellW;
     private final int cellH;
@@ -86,7 +80,6 @@ public class Cells extends Drawable implements TetrisControl {
 
     @Override
     public Point getShiftPoint(Drawable drawable) {
-
         return tetrisControl.getShiftPoint(this);
     }
 

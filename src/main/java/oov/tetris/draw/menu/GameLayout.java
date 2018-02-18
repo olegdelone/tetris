@@ -1,16 +1,14 @@
 package oov.tetris.draw.menu;
 
 import oov.tetris.draw.Drawable;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 import java.awt.*;
-
-/**
- * Created by Olegdelone on 25.07.2015.
- */
 public class GameLayout extends Drawable implements TetrisControl {
 
-    private static transient Logger log = Logger.getLogger(GameLayout.class);
+    private static Logger log = LoggerFactory.getLogger(GameLayout.class);
 
     private final int w;
     private final int h;
@@ -22,8 +20,7 @@ public class GameLayout extends Drawable implements TetrisControl {
     private Point cellsSP;
     private Point rMenuSP;
     private Point lMenuSP;
-    private  TextMenu lMenu;
-
+    private TextMenu lMenu;
 
     public Cells getCells() {
         return cells;
@@ -44,7 +41,7 @@ public class GameLayout extends Drawable implements TetrisControl {
 
     @Override
     public Point getShiftPoint(Drawable drawable) {
-        if(drawable  == cells){
+        if(drawable == cells){
             return cellsSP;
         }
         if (drawable == rMenu){
@@ -77,8 +74,6 @@ public class GameLayout extends Drawable implements TetrisControl {
         this.rMenu = rMenu;
         rMenu.setTetrisControl(this);
 
-        int hh = centerX>>1;
-
         int hPad = 0;
         int wPad = 0;
         if(cells != null){
@@ -105,6 +100,5 @@ public class GameLayout extends Drawable implements TetrisControl {
             wPad = ((centerX-lMenu.getW())>>1);
         }
         lMenuSP = new Point(wPad, hPad);
-
     }
 }

@@ -114,7 +114,7 @@ public class BitsPool {
             for (int i = 0; i < r.size(); i++, ++result) {
                 Integer y = r.get(i);
                 Map<Integer, BoxPoint> boxPoints = baskets.get(y);
-                RenderEngine.getInstance().removeAll(boxPoints.values()); // animation
+                RenderEngine.getInstance().removeAll(boxPoints.values());
                 boxPoints.clear();
                 if (i == r.size() - 1) {
                     moveTopPartDown(y, r.size());

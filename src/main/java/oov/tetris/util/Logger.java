@@ -3,18 +3,14 @@ package oov.tetris.util;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by Olegdelone on 19.07.2015.
  */
 public class Logger {
-    private static transient Logger log = Logger.getLogger(Logger.class);
+    private static Logger log = Logger.getLogger(Logger.class);
     public static Logger getLogger(Class aClass) {
         return new Logger(aClass);
     }

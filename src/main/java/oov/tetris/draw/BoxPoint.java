@@ -4,13 +4,7 @@ import oov.tetris.util.Logger;
 
 import java.awt.*;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Olezha
- * Date: 10.07.14
- * Time: 12:08
- * To change this template use File | Settings | File Templates.
- */
+
 public class BoxPoint extends Drawable implements Cloneable {
     private static transient Logger log = Logger.getLogger(BoxPoint.class);
 
@@ -47,7 +41,6 @@ public class BoxPoint extends Drawable implements Cloneable {
     public void addX(int x){
         point.x += x;
     }
-
     public void addY(int y){
         point.y += y;
     }

@@ -3,9 +3,7 @@ package oov.tetris.draw.item;
 import java.awt.*;
 import java.util.Random;
 
-/**
- * Created by Olegdelone on 02.08.2015.
- */
+
 public class CompObjFactory {
 
     private static final Color[] COLORS = {Color.GREEN, Color.RED, Color.BLUE, Color.ORANGE, Color.MAGENTA};
@@ -19,7 +17,7 @@ public class CompObjFactory {
         }
     }
 
-    public static Color getRandColor() {
+    private static Color getRandColor() {
         return COLORS[RANDOM.nextInt(COLORS.length)];
     }
 

@@ -1,49 +1,49 @@
 package oov.tetris;
 
 import oov.tetris.draw.Drawable;
-import oov.tetris.proc.RenderEngine;
 import oov.tetris.proc.GameController;
+import oov.tetris.proc.RenderEngine;
 import oov.tetris.util.AppProperties;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.util.Collection;
 
-/**
- * 07.09.13 18:13: Original version (OOBUKHOV)<br/>
- */
+
 public class Play {
 
     private static volatile boolean paused = false;
-    private static transient Logger log = Logger.getLogger(Play.class);
+    private static transient Logger log = LoggerFactory.getLogger(Play.class);
+    private final static int GAME_TIME = 100; // todo level parametrized
 
-    public static final int w = Integer.valueOf(AppProperties.get("canvas.width"));
-    public static final int h = Integer.valueOf(AppProperties.get("canvas.height"));
+    private static final int w = Integer.valueOf(AppProperties.get("canvas.width"));
+    private static final int h = Integer.valueOf(AppProperties.get("canvas.height"));
 
-    public final static BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-    public final static JComponent component = new OverriddenComponent();
+    private final static BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    private final static JComponent component = new OverriddenComponent();
 
     public static void main(String[] args) {
         initComponents();
         initRenderCallback();
 
-        RenderEngine re = RenderEngine.getInstance();
+        RenderEngine renderEngine = RenderEngine.getInstance();
 
         final GameController gameController = new GameController();
+
 
         KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         manager.addKeyEventDispatcher(e -> {
             if (e.getID() == KeyEvent.KEY_PRESSED) {
                 int eventCode = e.getKeyCode();
-                synchronized (re) {
+                synchronized (renderEngine) {
                     if (eventCode == KeyEvent.VK_P) {
                         paused = !paused;
                         if (!paused) {
                             log.debug("notifying...");
-                            re.notify();
+                            renderEngine.notify();
                         }
                     }
                     if (paused) {
@@ -72,10 +72,10 @@ public class Play {
 
         while (true) {
             while (paused) {
-                synchronized (re) {
+                synchronized (renderEngine) {
                     try {
                         log.debug("on waiting...");
-                        re.wait();
+                        renderEngine.wait();
                         log.debug("awaking...");
                     } catch (InterruptedException e) {
                         shutdown();
@@ -146,18 +146,15 @@ public class Play {
 
     private static void initRenderCallback() {
         RenderEngine renderEngine = RenderEngine.getInstance();
-        renderEngine.addListener(new RenderEngine.RenderListener() {
-            @Override
-            public void onEvent(Collection<Drawable> drawables) {
-                reset();
-                Graphics graphics = image.getGraphics();
-                synchronized (drawables) {
-                    for (Drawable drawable : drawables) {
-                        drawable.draw(graphics);
-                    }
+        renderEngine.addListener(drawables -> {
+            reset();
+            Graphics graphics = image.getGraphics();
+            synchronized (drawables) {
+                for (Drawable drawable : drawables) {
+                    drawable.draw(graphics);
                 }
-                render();
             }
+            render();
         });
     }
 
@@ -192,9 +189,6 @@ public class Play {
         gr.fillRect(0, 0, w, h);
     }
 
-    public final static int GAME_TIME = 100; // todo level parametrized
 
-    private static void heart() {
 
-    }
 }

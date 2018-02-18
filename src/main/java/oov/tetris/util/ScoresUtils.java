@@ -1,12 +1,13 @@
 package oov.tetris.util;
 
-import java.util.HashMap;
+import com.google.common.collect.Maps;
+
 import java.util.Map;
 
 
 public class ScoresUtils {
 
-    private static Map<Integer, Integer> CACHE_ = new HashMap<>(4);
+    private static Map<Integer, Integer> CACHE_ = Maps.newLinkedHashMapWithExpectedSize(4);
 
     public static int calcAndGetScores(int a) {
         if (a <= 0) {
@@ -16,7 +17,6 @@ public class ScoresUtils {
         if(scores == null){
             CACHE_.put(a, scores = calcScores(a));
         }
-
         return scores;
     }
 

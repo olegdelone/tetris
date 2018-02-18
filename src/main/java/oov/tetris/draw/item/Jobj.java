@@ -4,9 +4,7 @@ import oov.tetris.draw.BoxPoint;
 
 import java.awt.*;
 
-/**
- * Created by Olegdelone on 23.07.2015.
- */
+
 public class Jobj extends CompoundObj {
 
     public Jobj(int x, int y, Color color, int cellW, int cellH) {

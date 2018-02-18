@@ -1,30 +1,24 @@
 package oov.tetris.proc;
 
-import oov.tetris.Play;
+import com.google.common.collect.Lists;
 import oov.tetris.draw.Drawable;
 import oov.tetris.util.Logger;
 
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.awt.*;
+import java.text.DecimalFormat;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Olezha
- * Date: 11.07.14
- * Time: 0:51
- * To change this template use File | Settings | File Templates.
- */
+
 public class RenderEngine implements Runnable {
     private static transient Logger log = Logger.getLogger(RenderEngine.class);
-    private final static int RENDER_TIME = 1000 / 25;
-    private final Thread thread;
     private static volatile RenderEngine instance;
-    private final Collection<RenderListener> renderListeners = new ArrayList<RenderListener>();
-    private final Collection<Drawable> drawables = new ArrayList<Drawable>();
+//    private volatile float fps;
+    private final static int SECOND = 1000;
+    private final static int FPS_TIME = SECOND / 5;
+    private final static int RENDER_TIME = SECOND / 25;
+    private final Thread thread;
+    private final Collection<RenderListener> renderListeners = Lists.newArrayList();
+    private final Collection<Drawable> drawables = Lists.newArrayList();
 
     public void addListener(RenderListener renderListener) {
         renderListeners.add(renderListener);
@@ -32,6 +26,8 @@ public class RenderEngine implements Runnable {
 
     private RenderEngine() {
         thread = new Thread(this);
+//        add(new Fps());
+        thread.start();
     }
 
     public boolean add(Drawable drawable) {
@@ -43,6 +39,7 @@ public class RenderEngine implements Runnable {
     public boolean remove(Drawable drawable) {
         return drawables.remove(drawable);
     }
+
     public boolean removeAll(Collection<? extends Drawable> drawable) {
         return drawables.removeAll(drawable);
     }
@@ -61,27 +58,32 @@ public class RenderEngine implements Runnable {
             synchronized (RenderEngine.class) {
                 if (instance == null) {
                     instance = new RenderEngine();
-                    instance.start();
                 }
             }
         }
         return instance;
     }
 
-    private void start() {
-        thread.start();
-    }
-
     @Override
     public void run() {
         long timeStart = System.currentTimeMillis();
+        long timeStamp = timeStart;
+        int cnt = 0;
         while (!Thread.currentThread().isInterrupted()) {
             long timeCurrent = System.currentTimeMillis();
+
+            if (timeCurrent - timeStamp >= FPS_TIME) {
+                float fps = SECOND / ((timeCurrent - timeStamp)/cnt);
+                // todo: fire fps changed event
+                cnt = 0;
+                timeStamp = timeCurrent;
+            }
             if (timeCurrent - timeStart >= RENDER_TIME) {
+                cnt++;
                 fullRender();
                 long operationTime = System.currentTimeMillis() - timeCurrent;
                 long freeTime = RENDER_TIME - operationTime;
-                if (freeTime > 10) {
+                if (freeTime > 20) {
                     try {
                         Thread.sleep(freeTime);
                     } catch (InterruptedException e) {
@@ -94,7 +96,20 @@ public class RenderEngine implements Runnable {
         }
     }
 
-    public void fullRender() {
+
+    public interface RenderListener {
+        void onEvent(Collection<Drawable> drawables);
+    }
+
+//    private static class Fps extends Drawable {
+//        private final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##.00");
+//        @Override
+//        public void draw(Graphics g, int x, int y) {
+//            g.drawString(String.valueOf(DECIMAL_FORMAT.format(fps)), 5, 10);
+//        }
+//    }
+
+    private void fullRender() {
         notifyListeners(drawables);
     }
 
@@ -102,9 +117,5 @@ public class RenderEngine implements Runnable {
         for (RenderListener renderListener : renderListeners) {
             renderListener.onEvent(drawables);
         }
-    }
-
-    public interface RenderListener {
-        void onEvent(Collection<Drawable> drawables);
     }
 }

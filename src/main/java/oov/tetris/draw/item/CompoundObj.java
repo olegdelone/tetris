@@ -1,91 +1,41 @@
 package oov.tetris.draw.item;
 
 import oov.tetris.draw.BoxPoint;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
-/**
- * Created by Olegdelone on 22.07.2015.
- */
 
 public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
-    private static transient Logger log = Logger.getLogger(CompoundObj.class);
+    private static transient Logger log = LoggerFactory.getLogger(CompoundObj.class);
 
-    protected BoxPoint cursor;
+    private int xGap;
+    private int yGap;
+    private BoxPoint cursor;
+    private BoxPoint[] boxPoints;
 
-    protected BoxPoint[] boxPoints;
 
-    private int xGap = -1;
-    private int yGap = -1;
 
     protected CompoundObj(int x, int y, Color color, int cellW, int cellH) {
         boxPoints = obtainFigure(x, y, color, cellW, cellH);
         this.cursor = BoxPoint.makeBoxPoint(x, y, Color.PINK, cellW, cellH);
-        initGaps();
+        xGap = initXGap();
+        yGap = initYGap();
     }
-
 
     protected abstract BoxPoint[] obtainFigure(int x, int y, Color color, int cellW, int cellH);
 
 
-//    private static Random random = new Random();
-//
-//    public void randRotation() { // not good solution
-//        for (int i = 0, l = random.nextInt(4); i < l; i++) {
-//            rotateCW();
-//        }
-//    }
-
-
-    protected boolean isFlat() {
-        return getxGap() > getyGap();
-    }
-
-    protected void swapGaps() {
-        int tmp = getxGap();
-        xGap = getyGap();
-        yGap = tmp;
-//        log.debug("Swapped => x: {}; y: {}", xGap, yGap);
-
-    }
-
-    protected void initGaps() {
-        int x = getxGap();
-        int y = getyGap();
-        log.debug("init gaps: x {}; y {};", x, y);
-    }
 
     public int getxGap() {
-        if (xGap == -1) {
-            BoxPoint[] arr = boxPoints;
-            int minX = arr[0].getX();
-            for (int i = 1, l = arr.length; i < l; i++) {
-                BoxPoint boxPoint = arr[i];
-                int x = boxPoint.getX();
-                if (minX > x) {
-                    minX = x;
-                }
-            }
-            xGap = cursor.getX() - minX;
-        }
         return xGap;
     }
 
     public int getyGap() {
-        if (yGap == -1) {
-            BoxPoint[] arr = boxPoints;
-            int minY = arr[0].getY();
-            for (int i = 1, l = arr.length; i < l; i++) {
-                BoxPoint boxPoint = arr[i];
-                if (boxPoint.getY() < minY) {
-                    minY = boxPoint.getY();
-                }
-            }
-            yGap = cursor.getY() - minY;
-        }
         return yGap;
     }
+
 
 
     @Override
@@ -192,13 +142,6 @@ public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
         }
     }
 
-    public void setColor(Color color) {
-        for (BoxPoint boxPoint : boxPoints) {
-            boxPoint.setInnerColor(color);
-        }
-    }
-
-
     public void moveTo(int x, int y) {
         int dX = x - cursor.getX();
         int dY = y - cursor.getY();
@@ -265,4 +208,42 @@ public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
     public BoxPoint[] getBoxPoints() {
         return boxPoints;
     }
+
+
+    private int initXGap(){
+        BoxPoint[] arr = boxPoints;
+        int minX = arr[0].getX();
+        for (int i = 1, l = arr.length; i < l; i++) {
+            BoxPoint boxPoint = arr[i];
+            int x = boxPoint.getX();
+            if (minX > x) {
+                minX = x;
+            }
+        }
+        return cursor.getX() - minX;
+    }
+
+
+    private int initYGap(){
+        BoxPoint[] arr = boxPoints;
+        int minY = arr[0].getY();
+        for (int i = 1, l = arr.length; i < l; i++) {
+            BoxPoint boxPoint = arr[i];
+            if (boxPoint.getY() < minY) {
+                minY = boxPoint.getY();
+            }
+        }
+        return cursor.getY() - minY;
+    }
+
+    boolean isFlat() {
+        return getxGap() > getyGap();
+    }
+
+    private void swapGaps() {
+        int tmp = getxGap();
+        xGap = getyGap();
+        yGap = tmp;
+    }
+
 }

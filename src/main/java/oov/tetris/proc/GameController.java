@@ -1,9 +1,6 @@
 package oov.tetris.proc;
 
-import oov.tetris.Play;
 import oov.tetris.draw.BoxPoint;
-import oov.tetris.draw.ObjPutListener;
-import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.draw.menu.Cells;
 import oov.tetris.draw.menu.CellsPlayground;
@@ -11,23 +8,21 @@ import oov.tetris.draw.menu.GameLayout;
 import oov.tetris.draw.menu.TextMenu;
 import oov.tetris.proc.command.*;
 import oov.tetris.util.AppProperties;
-import oov.tetris.util.Logger;
 import oov.tetris.util.ScoresUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
-/**
- * 07.09.13 18:15: Original version (OOBUKHOV)<br/>
- */
 public class GameController {
-    private static transient Logger log = Logger.getLogger(GameController.class);
+    private static Logger log = LoggerFactory.getLogger(GameController.class);
 
-    static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
-    static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
-    static final int W = Integer.valueOf(AppProperties.get("field.width"));
-    static final int H = Integer.valueOf(AppProperties.get("field.height"));
-    static final int C_X = Integer.valueOf(AppProperties.get("field.capacityX"));
-    static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
+    private static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
+    private static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
+    private static final int W = Integer.valueOf(AppProperties.get("field.width"));
+    private static final int H = Integer.valueOf(AppProperties.get("field.height"));
+    private static final int C_X = Integer.valueOf(AppProperties.get("field.capacityX"));
+    private static final int C_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
     private CompoundObj currentObj;
     private final Cells cells;
