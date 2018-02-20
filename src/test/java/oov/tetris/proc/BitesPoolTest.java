@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BitsPoolTest {
+public class BitesPoolTest {
 
-    private static Logger log = LoggerFactory.getLogger(BitsPoolTest.class);
+    private static Logger log = LoggerFactory.getLogger(BitesPoolTest.class);
 
     @Test
     public void pt1() {
@@ -28,50 +28,50 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
+        BitesPool bitesPool = new BitesPool(xCap, yCap);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {
-                    bitsPool.put(new BoxPoint(j, i, null, null, 0, 0));
+                    bitesPool.put(new BoxPoint(j, i, null, null, 0, 0));
                 }
             } else {
-                bitsPool.put(new BoxPoint(i, i, null, null, 0, 0));
+                bitesPool.put(new BoxPoint(i, i, null, null, 0, 0));
             }
         }
-        log.info("{}", bitsPool);
+        log.info("{}", bitesPool);
         //-------------------------
 
         CompoundObj compoundObj = CompObjFactory.makeRandColorObj(6, 5, 10, 10, CompObjFactory.PART.S);
         log.info("{}", compoundObj);
 
-        Assert.assertTrue(!bitsPool.checkInPool(compoundObj));
+        Assert.assertTrue(!bitesPool.checkInPool(compoundObj));
 
         compoundObj = CompObjFactory.makeRandColorObj(0, 8, 10, 10, CompObjFactory.PART.S);
         log.info("{}", compoundObj);
 
-        Assert.assertTrue(!bitsPool.checkInPool(compoundObj));
+        Assert.assertTrue(!bitesPool.checkInPool(compoundObj));
 
 
         compoundObj = CompObjFactory.makeRandColorObj(4, 5, 10, 10, CompObjFactory.PART.S);
         log.info("{}", compoundObj);
-        Assert.assertTrue(bitsPool.checkInPool(compoundObj));
+        Assert.assertTrue(bitesPool.checkInPool(compoundObj));
 
 
         compoundObj = CompObjFactory.makeRandColorObj(5, 8, 10, 10, CompObjFactory.PART.Z);
         compoundObj.rotateCCW();
         log.info("{}", compoundObj);
-        Assert.assertTrue(!bitsPool.checkInPool(compoundObj));
+        Assert.assertTrue(!bitesPool.checkInPool(compoundObj));
 
-        Assert.assertTrue(bitsPool.checkGapsClash(compoundObj.getxGap(),
+        Assert.assertTrue(bitesPool.checkGapsClash(compoundObj.getxGap(),
                 compoundObj.getyGap(),
                 compoundObj.getCursor().getX(),
                 compoundObj.getCursor().getY()));
 
-        Assert.assertTrue(bitsPool.checkInPool(0, 0));
-        Assert.assertTrue(!bitsPool.checkInPool(1, 0));
+        Assert.assertTrue(bitesPool.checkInPool(0, 0));
+        Assert.assertTrue(!bitesPool.checkInPool(1, 0));
 
-        bitsPool.eraseLines();
-        log.info("{}", bitsPool);
+        bitesPool.eraseLines();
+        log.info("{}", bitesPool);
     }
 
     @Test
@@ -79,15 +79,15 @@ public class BitsPoolTest {
 
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
+        BitesPool bitesPool = new BitesPool(xCap, yCap);
 
         //-------------------------
 
         CompoundObj compoundObj = CompObjFactory.makeRandColorObj(3, 6, 10, 10, CompObjFactory.PART.S);
         log.info("{}", compoundObj);
 
-        bitsPool.put(compoundObj);
-        log.info("{}", bitsPool);
+        bitesPool.put(compoundObj);
+        log.info("{}", bitesPool);
 
     }
 
@@ -103,30 +103,30 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
+        BitesPool bitesPool = new BitesPool(xCap, yCap);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {
-                    bitsPool.put(new BoxPoint(j, i, null, null, 0, 0));
+                    bitesPool.put(new BoxPoint(j, i, null, null, 0, 0));
                 }
             } else {
-//                bitsPool.put(new BoxPoint(i, i, null, null, 0, 0));
+//                bitesPool.put(new BoxPoint(i, i, null, null, 0, 0));
             }
         }
-        log.info("before {}", bitsPool);
+        log.info("before {}", bitesPool);
 
         Map<Integer, Map<Integer, BoxPoint>> snapshot = new HashMap<Integer, Map<Integer, BoxPoint>>(10);
         for (int i = 0; i < 10; i++) {
-            snapshot.put(i, bitsPool.getRow(i));
+            snapshot.put(i, bitesPool.getRow(i));
         }
-        Map<Integer, BoxPoint> y0 = bitsPool.getRow(0);
-        bitsPool.moveTopPartDown(7, 1);
-        log.info("after {}", bitsPool);
+        Map<Integer, BoxPoint> y0 = bitesPool.getRow(0);
+        bitesPool.moveTopPartDown(7, 1);
+        log.info("after {}", bitesPool);
         for (int i = 0; i < 10; i++) {
             if (i >= 1 && i <= 7) {
-                Assert.assertTrue(snapshot.get(i - 1) == bitsPool.getRow(i));
+                Assert.assertTrue(snapshot.get(i - 1) == bitesPool.getRow(i));
             } else {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i));
+                Assert.assertTrue(snapshot.get(i) == bitesPool.getRow(i));
             }
         }
         //-------------------------
@@ -146,37 +146,37 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
+        BitesPool bitesPool = new BitesPool(xCap, yCap);
         for (int i = 0; i < yCap; i++) {
-            bitsPool.put(new BoxPoint(i, i, null, null, 0, 0));
+            bitesPool.put(new BoxPoint(i, i, null, null, 0, 0));
         }
-        bitsPool.reset();
+        bitesPool.reset();
 
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {
-                    bitsPool.put(new BoxPoint(j, i, null, null, 0, 0));
+                    bitesPool.put(new BoxPoint(j, i, null, null, 0, 0));
                 }
             }
         }
-        log.info("before {}", bitsPool);
+        log.info("before {}", bitesPool);
 
         Map<Integer, Map<Integer, BoxPoint>> snapshot = new HashMap<Integer, Map<Integer, BoxPoint>>(10);
         for (int i = 0; i < yCap; i++) {
-            snapshot.put(i, bitsPool.getRow(i));
+            snapshot.put(i, bitesPool.getRow(i));
         }
-        Map<Integer, BoxPoint> y0 = bitsPool.getRow(0);
-        bitsPool.moveTopPartDown(4, 2);
-        log.info("after {}", bitsPool);
+        Map<Integer, BoxPoint> y0 = bitesPool.getRow(0);
+        bitesPool.moveTopPartDown(4, 2);
+        log.info("after {}", bitesPool);
         for (int i = 0; i <= 3; i++) {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i+2));
+                Assert.assertTrue(snapshot.get(i) == bitesPool.getRow(i+2));
         }
 
         for (int i = 6; i <= yCap; i++) {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i));
+                Assert.assertTrue(snapshot.get(i) == bitesPool.getRow(i));
         }
-        Assert.assertTrue(snapshot.get(4) == bitsPool.getRow(1));
-        Assert.assertTrue(snapshot.get(5) == bitsPool.getRow(0));
+        Assert.assertTrue(snapshot.get(4) == bitesPool.getRow(1));
+        Assert.assertTrue(snapshot.get(5) == bitesPool.getRow(0));
         //-------------------------
 
     }
@@ -265,7 +265,7 @@ public class BitsPoolTest {
         }};
         int yCap = 10, xCap = 10;
 
-        BitsPool bPool1 = new BitsPool(xCap,yCap, null);
+        BitesPool bPool1 = new BitesPool(xCap,yCap);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {

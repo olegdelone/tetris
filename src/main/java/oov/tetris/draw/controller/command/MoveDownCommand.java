@@ -1,9 +1,8 @@
 package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.BoxPoint;
-import oov.tetris.draw.ObjPutListener;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.proc.BitsPool;
+import oov.tetris.proc.BitesPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,13 +10,13 @@ import org.slf4j.LoggerFactory;
 public class MoveDownCommand implements CtrlCommand {
     private static Logger log = LoggerFactory.getLogger(MoveDownCommand.class);
 
-    private final BitsPool bitsPool;
+    private final BitesPool bitesPool;
     private final CompoundObj compoundObj;
     private final int cy;
     private final ObjPutListener objPutListener;
 
-    public MoveDownCommand(BitsPool bitsPool, CompoundObj compoundObj, int cy, ObjPutListener objPutListener) {
-        this.bitsPool = bitsPool;
+    public MoveDownCommand(BitesPool bitesPool, CompoundObj compoundObj, int cy, ObjPutListener objPutListener) {
+        this.bitesPool = bitesPool;
         this.compoundObj = compoundObj;
         this.cy = cy;
         this.objPutListener = objPutListener;
@@ -27,9 +26,9 @@ public class MoveDownCommand implements CtrlCommand {
     public void execute() {
         BoxPoint cursor = compoundObj.getCursor();
         if (cursor.getY() == cy - 1) {
-            bitsPool.put(compoundObj);
+            bitesPool.put(compoundObj);
             objPutListener.onEvent(compoundObj);
-        } else if (bitsPool.checkNextYInPool(compoundObj)) {
+        } else if (bitesPool.checkNextYInPool(compoundObj)) {
             log.debug("clash detected");
             CompoundObj cloned;
             try {
@@ -39,15 +38,19 @@ public class MoveDownCommand implements CtrlCommand {
             }
             cloned.moveDown();
 
-            if(bitsPool.checkInPool(cloned)){
-                bitsPool.put(compoundObj);
+            if(bitesPool.checkInPool(cloned)){
+                bitesPool.put(compoundObj);
                 objPutListener.onEvent(compoundObj);
             } else {
-                bitsPool.put(cloned);
+                bitesPool.put(cloned);
                 objPutListener.onEvent(cloned);
             }
         } else {
             compoundObj.moveDown();
         }
+    }
+
+    public interface ObjPutListener {
+        void onEvent(CompoundObj compoundObj);
     }
 }

@@ -2,110 +2,99 @@ package oov.tetris.draw.controller;
 
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.controller.command.*;
-import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.draw.view.PlayDesk;
-import oov.tetris.draw.view.PreviewDesk;
-import oov.tetris.draw.view.GameLayout;
-import oov.tetris.draw.view.TextMenu;
-import oov.tetris.proc.BitsPool;
+import oov.tetris.proc.BitesPool;
 import oov.tetris.proc.FiguresStack;
-import oov.tetris.proc.RenderEngine;
-import oov.tetris.util.AppProperties;
+import oov.tetris.proc.PlayEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-
 public class GameController {
-    private static Logger log = LoggerFactory.getLogger(GameController.class);
+    private final static Logger log = LoggerFactory.getLogger(GameController.class);
 
-    private static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
-    private static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
-    private static final int W = Integer.valueOf(AppProperties.get("field.width"));
-    private static final int H = Integer.valueOf(AppProperties.get("field.height"));
-    private static final int CAP_X = Integer.valueOf(AppProperties.get("field.capacityX"));
-    private static final int CAP_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
-
-    private CompoundObj currentObj;
-    private final PlayDesk playDesk;
-    private final PreviewDesk previewDesk;
+    private final int capX;
+    private final int capY;
     private final FiguresStack figuresStack;
-    private BitsPool bitsPool;
+    private final BitesPool bitesPool;
+    private final PlayEngine playEngine;
+    private volatile boolean paused;
+    private CompoundObj currentObj;
 
-    public GameController() {
-        GameLayout gameLayout = new GameLayout(CW, CH);
 
-        TextMenu textMenu = new TextMenu(150, 100, Color.DARK_GRAY);
-        bitsPool = new BitsPool(CAP_X, CAP_Y, textMenu);
-        playDesk = new PlayDesk(CAP_X, CAP_Y, W, H, Color.DARK_GRAY);
-        previewDesk = new PreviewDesk(playDesk.getCellW(), playDesk.getCellH(), Color.DARK_GRAY,4, 4);
-
-        gameLayout.setPlayDesk(playDesk);
-        gameLayout.setTextMenu(textMenu);
-        gameLayout.setPreviewDesk(previewDesk);
-        RenderEngine.getInstance().add(gameLayout);
-        CompObjFactory compObjFactory = new CompObjFactory(playDesk.getCellW(), playDesk.getCellH());
-        figuresStack = new FiguresStack(2, compObjFactory);
-
+    public GameController(FiguresStack figuresStack, BitesPool bitesPool, int capX, int capY) {
+        playEngine = PlayEngine.getInstance();
+        this.figuresStack = figuresStack;
+        this.bitesPool = bitesPool;
+        this.capX = capX;
+        this.capY = capY;
         roll();
     }
 
     private void roll(){
         currentObj = figuresStack.next();
-        CompoundObj ongoing = figuresStack.getOngoing();
-        previewDesk.placeObj(ongoing);
         log.debug("obj: {}", currentObj);
-        playDesk.placeObj(currentObj);
     }
 
     public void right() {
-        CtrlCommand command = new MoveRightCommand(bitsPool, currentObj, CAP_X);
-        command.execute();
+        CtrlCommand command = new MoveRightCommand(bitesPool, currentObj, capX);
+        exec(command);
     }
 
     public void left() {
-        CtrlCommand command = new MoveLeftCommand(bitsPool, currentObj);
-        command.execute();
+        CtrlCommand command = new MoveLeftCommand(bitesPool, currentObj);
+        exec(command);
     }
 
     public void up() {
         BoxPoint cursor = currentObj.getCursor();
-        if (cursor.getY() > 0) {
-            currentObj.moveUp();
-        }
+        exec(() -> {
+            if (cursor.getY() > 0) {
+                currentObj.moveUp();
+            }
+        });
     }
 
     public void down() {
-        CtrlCommand command = new MoveDownCommand(bitsPool, currentObj, CAP_Y, compoundObj -> {
-            log.debug("onEventCalled");
-//            log.info("co: {}", compoundObj);
-//            if(compoundObj.getCursor().getY() == 0){
-//                Play.overTheGame();
-//                return;
-//                // todo game over
-//            }
-            bitsPool.eraseLines();
+        CtrlCommand command = new MoveDownCommand(bitesPool, currentObj, capY, compoundObj -> {
+            bitesPool.eraseLines();
             roll();
         });
-        command.execute();
+        exec(command);
     }
 
     public void rotateCW() {
-        CtrlCommand command = new RotateCWCommand(bitsPool, currentObj, CAP_X);
-        command.execute();
-
+        CtrlCommand command = new RotateCWCommand(bitesPool, currentObj, capX);
+        exec(command);
     }
 
     public void rotateCCW() {
-        CtrlCommand command = new RotateCCWCommand(bitsPool, currentObj, CAP_X);
-        command.execute();
+        CtrlCommand command = new RotateCCWCommand(bitesPool, currentObj, capX);
+        exec(command);
     }
 
+    public void togglePause(){
+        log.info("togglePause requested");
+        togglePauseVar();
+        playEngine.setPaused(paused);
+    }
 
+    public void overTheGame() {
+        if(!paused){
+            togglePause();
+        }
+    }
 
+    private void exec(CtrlCommand ctrlCommand){
+        if(paused){
+            log.warn("the game is on pause.");
+            return;
+        }
+        ctrlCommand.execute();
+    }
 
-
+    private synchronized void togglePauseVar(){
+        paused = !paused;
+    }
 
 
 }

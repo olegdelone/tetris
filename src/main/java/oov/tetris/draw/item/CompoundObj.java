@@ -183,6 +183,10 @@ public abstract class CompoundObj extends AncorControl implements Moveable, Rota
     public String toString() {
         StringBuilder sb = new StringBuilder("CompObj_").append("{");
         sb.append("\n--->");
+        if(cursor == null){
+            sb.append(getClass().getSimpleName());
+            return sb.toString();
+        }
         for (int i = cursor.getX() - xGap; i <= cursor.getX(); sb.append("(").append(i++).append(")")) ;
         sb.append("\n");
         for (int j = cursor.getY() - yGap; j <= cursor.getY(); j++) {

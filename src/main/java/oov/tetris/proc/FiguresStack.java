@@ -11,7 +11,17 @@ import java.util.Deque;
 public class FiguresStack {
     private final Deque<CompoundObj> stack = Lists.newLinkedList();
     private final CompObjFactory compObjFactory;
+    private ChunksStackManagerOngoingListener ongoingListener;
+    private ChunksStackManagerCurrentListener currentListener;
     private CompoundObj ongoing;
+
+    public void setOngoingListener(ChunksStackManagerOngoingListener ongoingListener) {
+        this.ongoingListener = ongoingListener;
+    }
+
+    public void setCurrentListener(ChunksStackManagerCurrentListener currentListener) {
+        this.currentListener = currentListener;
+    }
 
     public FiguresStack(int deep, CompObjFactory compObjFactory) {
         this.compObjFactory = compObjFactory;
@@ -25,6 +35,9 @@ public class FiguresStack {
 
     public CompoundObj next() {
         CompoundObj compoundObj = stack.pop();
+        if(currentListener != null){
+            currentListener.onObjIsReady(compoundObj);
+        }
         genAndAdd();
         initOngoing();
         return compoundObj;
@@ -41,9 +54,9 @@ public class FiguresStack {
 
     private void initOngoing(){
         ongoing = stack.peek();
-//        if(stackManagerListener != null){
-//            stackManagerListener.onOngoingObjIsReady(ongoing);
-//        }
+        if(ongoingListener != null){
+            ongoingListener.onOngoingObjIsReady(ongoing);
+        }
     }
 
     public interface ChunksStackManagerOngoingListener {

@@ -2,7 +2,7 @@ package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.proc.BitsPool;
+import oov.tetris.proc.BitesPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
 public abstract class AbsRotateCommand implements CtrlCommand {
     private static Logger log = LoggerFactory.getLogger(AbsRotateCommand.class);
 
-    private final BitsPool bitsPool;
+    private final BitesPool bitesPool;
     private final CompoundObj compoundObj;
     private final int cx;
 
-    public AbsRotateCommand(BitsPool bitsPool, CompoundObj compoundObj, int cx) {
-        this.bitsPool = bitsPool;
+    public AbsRotateCommand(BitesPool bitesPool, CompoundObj compoundObj, int cx) {
+        this.bitesPool = bitesPool;
         this.compoundObj = compoundObj;
         this.cx = cx;
     }
@@ -46,7 +46,7 @@ public abstract class AbsRotateCommand implements CtrlCommand {
             log.debug("cloned&rotated: {}", cloned);
             cloned.moveLeft(x_);
             log.debug("cloned&rotated&moved: {}", cloned);
-            if (!bitsPool.checkInPool(cloned)) {
+            if (!bitesPool.checkInPool(cloned)) {
                 compoundObj.moveLeft(x_);
                 originalAction(compoundObj);
             }
@@ -64,12 +64,12 @@ public abstract class AbsRotateCommand implements CtrlCommand {
             log.debug("cloned&rotated: {}", cloned);
             cloned.moveRight(x_);
             log.debug("cloned&rotated&moved: {}", cloned);
-            if (!bitsPool.checkInPool(cloned)) {
+            if (!bitesPool.checkInPool(cloned)) {
                 compoundObj.moveRight(x_);
                 originalAction(compoundObj);
             }
         } else {
-            if(!bitsPool.checkGapsClash(yGap,xGap,rpx,cy)){
+            if(!bitesPool.checkGapsClash(yGap,xGap,rpx,cy)){
                 originalAction(compoundObj);
             }
         }

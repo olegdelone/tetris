@@ -2,7 +2,7 @@ package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.proc.BitsPool;
+import oov.tetris.proc.BitesPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 public class MoveLeftCommand implements CtrlCommand {
     private static Logger log = LoggerFactory.getLogger(MoveLeftCommand.class);
 
-    private final BitsPool bitsPool;
+    private final BitesPool bitesPool;
     private final CompoundObj compoundObj;
 
-    public MoveLeftCommand(BitsPool bitsPool, CompoundObj compoundObj) {
-        this.bitsPool = bitsPool;
+    public MoveLeftCommand(BitesPool bitesPool, CompoundObj compoundObj) {
+        this.bitesPool = bitesPool;
         this.compoundObj = compoundObj;
     }
 
@@ -26,7 +26,7 @@ public class MoveLeftCommand implements CtrlCommand {
         int xGap = compoundObj.getxGap();
         int yGap = compoundObj.getyGap();
         if (cx - xGap > 0) {
-            if (bitsPool.checkGapsClash(xGap, yGap, cx-1, cy)) {
+            if (bitesPool.checkGapsClash(xGap, yGap, cx-1, cy)) {
 //                log.debug("gaps clashed");
                 CompoundObj cloned;
                 try {
@@ -35,7 +35,7 @@ public class MoveLeftCommand implements CtrlCommand {
                     throw new RuntimeException(e);
                 }
                 cloned.moveLeft(1);
-                if (!bitsPool.checkInPool(cloned)) {
+                if (!bitesPool.checkInPool(cloned)) {
                     compoundObj.moveLeft();
                 }
             } else {

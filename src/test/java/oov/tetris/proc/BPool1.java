@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 
-public class BPool1 extends BitsPool {
+public class BPool1 extends BitesPool {
     private static Logger log = LoggerFactory.getLogger(BPool1.class);
 
     public Map<Integer, Integer> getM() {
@@ -21,7 +21,7 @@ public class BPool1 extends BitsPool {
     Map<Integer, Integer> m;
 
     public BPool1(int xCap, int yCap) {
-        super(xCap, yCap, null);
+        super(xCap, yCap);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class BPool1 extends BitsPool {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("BitsPool{");
+        StringBuilder sb = new StringBuilder("BitesPool{");
         sb.append("\n");
         sb.append("\n---______>");
         for (int i = 0; i < xCap; sb.append("(").append(i++).append(")")) ;

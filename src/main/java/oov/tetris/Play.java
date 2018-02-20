@@ -1,7 +1,11 @@
 package oov.tetris;
 
-import oov.tetris.draw.Drawable;
 import oov.tetris.draw.controller.GameController;
+import oov.tetris.draw.item.CompObjFactory;
+import oov.tetris.draw.view.*;
+import oov.tetris.proc.BitesPool;
+import oov.tetris.proc.FiguresStack;
+import oov.tetris.proc.PlayEngine;
 import oov.tetris.proc.RenderEngine;
 import oov.tetris.util.AppProperties;
 import org.slf4j.Logger;
@@ -10,160 +14,92 @@ import org.slf4j.LoggerFactory;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyEvent;
-import java.awt.image.BufferedImage;
 
 
 public class Play {
-
-    private static volatile boolean paused = false;
     private static Logger log = LoggerFactory.getLogger(Play.class);
-    private final static int GAME_TIME = 100; // todo level parametrized
 
-    private static final int w = Integer.valueOf(AppProperties.get("canvas.width"));
-    private static final int h = Integer.valueOf(AppProperties.get("canvas.height"));
-
-    private final static BufferedImage image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-    private final static JComponent component = new OverriddenComponent();
+    private static final int CW = Integer.valueOf(AppProperties.get("canvas.width"));
+    private static final int CH = Integer.valueOf(AppProperties.get("canvas.height"));
+    private static final int W = Integer.valueOf(AppProperties.get("field.width"));
+    private static final int H = Integer.valueOf(AppProperties.get("field.height"));
+    private static final int CAP_X = Integer.valueOf(AppProperties.get("field.capacityX"));
+    private static final int CAP_Y = Integer.valueOf(AppProperties.get("field.capacityY"));
 
     public static void main(String[] args) {
-        initComponents();
-        initRenderCallback();
-
+        log.info("starting...");
+        ImageComponent imageComponent = initImageComponent();
         RenderEngine renderEngine = RenderEngine.getInstance();
+        renderEngine.addListener(imageComponent);
+        FpsText fpsText = new FpsText();
+        renderEngine.add(fpsText);
+        renderEngine.setFpsListener(fpsText);
 
-        final GameController gameController = new GameController();
+        GameLayout gameLayout = new GameLayout(CW, CH);
+        TextMenu textMenu = new TextMenu(150, 100, Color.DARK_GRAY);
+        PlayDesk playDesk = new PlayDesk(CAP_X, CAP_Y, W, H, Color.DARK_GRAY);
+        int pdCellW = playDesk.getCellW();
+        int pdCellH = playDesk.getCellH();
+        PreviewDesk previewDesk = new PreviewDesk(pdCellW, pdCellH, Color.DARK_GRAY,4, 4);
+        gameLayout.setPlayDesk(playDesk);
+        gameLayout.setTextMenu(textMenu);
+        gameLayout.setPreviewDesk(previewDesk);
+        renderEngine.add(gameLayout);
 
+        BitesPool bitesPool = new BitesPool(CAP_X, CAP_Y);
+        bitesPool.setErasingListener(textMenu);
+        final GameController gameController = initController(pdCellW, pdCellH, bitesPool, playDesk, previewDesk);
+        PlayEngine playEngine = PlayEngine.getInstance();
+        playEngine.addPlayStepListener(gameController::down);
+        initKeys(playEngine, gameController);
 
-        KeyboardFocusManager manager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
-        manager.addKeyEventDispatcher(e -> {
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
-                int eventCode = e.getKeyCode();
-                synchronized (renderEngine) {
-                    if (eventCode == KeyEvent.VK_P) {
-                        paused = !paused;
-                        if (!paused) {
-                            log.debug("notifying...");
-                            renderEngine.notify();
-                        }
-                    }
-                    if (paused) {
-                        return false;
-                    }
-                    if (eventCode == KeyEvent.VK_D) {
-                        gameController.right();
-                    } else if (eventCode == KeyEvent.VK_A) {
-                        gameController.left();
-                    } else if (eventCode == KeyEvent.VK_W) {
-                        gameController.up(); // todo for test purposes only
-                    } else if (eventCode == KeyEvent.VK_S) {
-                        gameController.down();
-                    } else if (eventCode == KeyEvent.VK_RIGHT || eventCode == KeyEvent.VK_SPACE || eventCode == KeyEvent.VK_E) {
-                        gameController.rotateCW();
-                    } else if (eventCode == KeyEvent.VK_LEFT || eventCode == KeyEvent.VK_Q) {
-                        gameController.rotateCCW();
-                    }
-                }
-            }
-            return true;
+        AncorControl gameOver = new AnchorText("Game over", Color.WHITE);
+        gameOver.setAncor(new Point(W >> 1, H >> 1));
+
+        bitesPool.setOverflowListener(() -> {
+            gameController.overTheGame();
+            renderEngine.add(gameOver);
         });
-
-        int tick = 0;
-        long timeStart = System.currentTimeMillis();
-
-        while (true) {
-            while (paused) {
-                synchronized (renderEngine) {
-                    try {
-                        log.debug("on waiting...");
-                        renderEngine.wait();
-                        log.debug("awaking...");
-                    } catch (InterruptedException e) {
-                        shutdown();
-                        return;
-                    }
-                }
-            }
-            long timeCurrent = System.currentTimeMillis();
-
-            if (timeCurrent - timeStart >= GAME_TIME) {
-                if (++tick % 3 == 0) {
-                    gameController.down();
-                }
-                timeStart = timeCurrent;
-            }
-
-        }
+        playEngine.start();
     }
 
-    public static void overTheGame() {
-        paused = true;
-        RenderEngine.getInstance().add(g -> {
-            Color bgColor = Color.WHITE;
-            Graphics gr = image.getGraphics();
-            gr.setColor(bgColor);
-            gr.drawString("Game over", w >> 1, h >> 1);
-        });
+    private static void initKeys(PlayEngine playEngine, GameController gameController) {
+        playEngine.addKeyCommand(KeyEvent.VK_W, (KeyEvent e) -> gameController.up());// todo for test purposes only
+        playEngine.addKeyCommand(KeyEvent.VK_D, (KeyEvent e) -> gameController.right());
+        playEngine.addKeyCommand(KeyEvent.VK_A, (KeyEvent e) -> gameController.left());
+        playEngine.addKeyCommand(KeyEvent.VK_S, (KeyEvent e) -> gameController.down());
+
+        playEngine.addKeyCommand(KeyEvent.VK_RIGHT, (KeyEvent e) -> gameController.rotateCW());
+        playEngine.addKeyCommand(KeyEvent.VK_SPACE, (KeyEvent e) -> gameController.rotateCW());
+        playEngine.addKeyCommand(KeyEvent.VK_E, (KeyEvent e) -> gameController.rotateCW());
+
+        playEngine.addKeyCommand(KeyEvent.VK_LEFT, (KeyEvent e) -> gameController.rotateCCW());
+        playEngine.addKeyCommand(KeyEvent.VK_Q, (KeyEvent e) -> gameController.rotateCCW());
+
+        playEngine.addKeyCommand(KeyEvent.VK_P, e -> gameController.togglePause());
     }
 
-    private static void shutdown() {
-        log.info("shutting down");
-        Thread thread = RenderEngine.getInstance().stop();
-        try {
-            if (thread.isAlive()) {
-                log.info("joining to the thread...");
-                thread.join();
-                log.info("join released...");
-            }
-        } catch (InterruptedException e1) {
-            log.warn("join interrupted.", e1);
-        }
-    }
+    private static GameController initController(int cellW, int cellH, BitesPool bitesPool,
+                                                 FiguresStack.ChunksStackManagerCurrentListener currentListener,
+                                                 FiguresStack.ChunksStackManagerOngoingListener ongoingListener) {
 
-    private static void initRenderCallback() {
-        RenderEngine renderEngine = RenderEngine.getInstance();
-        renderEngine.addListener(drawables -> {
-            reset();
-            Graphics graphics = image.getGraphics();
-            synchronized (drawables) {
-                for (Drawable drawable : drawables) {
-                    drawable.draw(graphics);
-                }
-            }
-            render();
-        });
+        CompObjFactory compObjFactory = new CompObjFactory(cellW, cellH);
+        FiguresStack figuresStack = new FiguresStack(2, compObjFactory);
+        figuresStack.setCurrentListener(currentListener);
+        figuresStack.setOngoingListener(ongoingListener);
+        return new GameController(figuresStack, bitesPool, CAP_X, CAP_Y);
     }
 
 
-    private static void initComponents() {
-        Dimension dimension = new Dimension(w, h);
-
-        component.setMinimumSize(dimension);
-        component.setMaximumSize(dimension);
-        component.setPreferredSize(dimension);
-
+    private static ImageComponent initImageComponent() {
+        ImageComponent component = new ImageComponent(CW, CH);
         JFrame frame = new JFrame("Tetris");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
         frame.add(component, BorderLayout.CENTER);
         frame.setResizable(false);
         frame.pack();
-//        frame.setLocationRelativeTo(null);
-//        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-//        frame.setBounds(150, 150, w, h);
         frame.setVisible(true);
+        return component;
     }
-
-    private static void render() {
-        component.getGraphics().drawImage(image, 0, 0, w, h, 0, 0, w, h, null);
-    }
-
-    private static void reset() {
-        Color bgColor = Color.BLACK;
-        Graphics gr = image.getGraphics();
-        gr.setColor(bgColor);
-        gr.fillRect(0, 0, w, h);
-    }
-
-
-
 }

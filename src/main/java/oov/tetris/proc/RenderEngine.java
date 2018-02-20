@@ -1,5 +1,6 @@
 package oov.tetris.proc;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import oov.tetris.draw.Drawable;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ public class RenderEngine implements Runnable {
     private final static int FPS_TIME = SECOND / 5;
     private final static int RENDER_TIME = SECOND / 25;
     private final Thread thread;
+    private FpsListener fpsListener;
     private final Collection<RenderListener> renderListeners = Lists.newArrayList();
     private final Collection<Drawable> drawables = Lists.newArrayList();
 
@@ -25,7 +27,6 @@ public class RenderEngine implements Runnable {
 
     private RenderEngine() {
         thread = new Thread(this);
-//        add(new Fps());
         thread.start();
     }
 
@@ -42,11 +43,18 @@ public class RenderEngine implements Runnable {
     }
 
     public Thread stop() {
-        if (thread == null) {
-            throw new IllegalStateException("thread not started");
-        }
+        Preconditions.checkState(thread != null);
         thread.interrupt();
         instance = null;
+        try {
+            if (thread.isAlive()) {
+                log.info("joining to the thread...");
+                thread.join();
+                log.info("join released...");
+            }
+        } catch (InterruptedException e1) {
+            log.warn("join interrupted.", e1);
+        }
         return thread;
     }
 
@@ -71,7 +79,9 @@ public class RenderEngine implements Runnable {
 
             if (timeCurrent - timeStamp >= FPS_TIME) {
                 float fps = SECOND / ((timeCurrent - timeStamp)/cnt);
-                // todo: fire fps changed event
+                if(fpsListener != null){
+                    fpsListener.onEvent(fps);
+                }
                 cnt = 0;
                 timeStamp = timeCurrent;
             }
@@ -93,18 +103,18 @@ public class RenderEngine implements Runnable {
         }
     }
 
+    public void setFpsListener(FpsListener fpsListener) {
+        this.fpsListener = fpsListener;
+    }
+
 
     public interface RenderListener {
         void onEvent(Collection<Drawable> drawables);
     }
 
-//    private static class Fps extends Drawable {
-//        private final static DecimalFormat DECIMAL_FORMAT = new DecimalFormat("##.00");
-//        @Override
-//        public void draw(Graphics g, int x, int y) {
-//            g.drawString(String.valueOf(DECIMAL_FORMAT.format(fps)), 5, 10);
-//        }
-//    }
+    public interface FpsListener {
+        void onEvent(float fps);
+    }
 
     private void fullRender() {
         notifyListeners(drawables);
@@ -115,4 +125,5 @@ public class RenderEngine implements Runnable {
             renderListener.onEvent(drawables);
         }
     }
+
 }

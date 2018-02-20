@@ -1,12 +1,12 @@
 package oov.tetris.draw.view;
 
-import oov.tetris.proc.BitsPool;
+import oov.tetris.proc.BitesPool;
 import oov.tetris.util.ScoresUtils;
 
 import java.awt.*;
 
 
-public class TextMenu extends AncorControl implements BitsPool.BitesPoolEventListener{
+public class TextMenu extends AncorControl implements BitesPool.BitesPoolLinesErasingListener {
 
     private int scores;
     private int level = 1;

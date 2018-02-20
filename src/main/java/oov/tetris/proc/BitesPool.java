@@ -12,21 +12,25 @@ import java.util.*;
 import java.util.List;
 
 
-public class BitsPool {
-    private static Logger log = LoggerFactory.getLogger(BitsPool.class);
+public class BitesPool {
+    private static final Logger log = LoggerFactory.getLogger(BitesPool.class);
+
     final Map<Integer, Map<Integer, BoxPoint>> rowMap;
-    final BitesPoolEventListener poolEventListener;
     final int xCap;
     final int yCap;
+    private BitesPoolLinesErasingListener erasingListener;
+    private BitesPoolOverflowListener overflowListener;
 
-    public interface BitesPoolEventListener{
+    public interface BitesPoolLinesErasingListener {
         void onAfterLinesErased(int cnt);
+    }
+    public interface BitesPoolOverflowListener {
+        void onOverflown();
     }
 
 
-    public BitsPool(int xCap, int yCap, BitesPoolEventListener poolEventListener) {
+    public BitesPool(int xCap, int yCap) {
         this.rowMap = Maps.newLinkedHashMapWithExpectedSize(yCap);
-        this.poolEventListener = poolEventListener;
         for (int i = 0; i < yCap; i++) {
             rowMap.put(i, Maps.newHashMap());
         }
@@ -41,11 +45,17 @@ public class BitsPool {
     }
 
     public void put(CompoundObj compoundObj) {
-        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
-            put(boxPoint);
+        if(compoundObj.getCursor().getY() - compoundObj.getyGap() <= 0) {
+            if(overflowListener != null){
+                overflowListener.onOverflown();
+            }
+            putYCorrectBoxes(compoundObj);
+        } else {
+            putAllBoxes(compoundObj);
         }
         compoundObj.deactivate();
     }
+
 
     public void put(BoxPoint boxPoint) {
         int x = boxPoint.getX();
@@ -85,7 +95,7 @@ public class BitsPool {
         }
     }
 
-    public Map<Integer, Map<Integer, BoxPoint>> getYReadyForErase(){
+    public Map<Integer, Map<Integer, BoxPoint>> getAllForErase() { // for animation ??
         Map<Integer, Map<Integer, BoxPoint>> result = Maps.newLinkedHashMap();
         for (int y = yCap - 1; y >= 0; y--) { // down to up
             Map<Integer, BoxPoint> row = rowMap.get(y);
@@ -96,7 +106,7 @@ public class BitsPool {
         return result;
     }
 
-    public RowBunch getNextBunch() {
+    protected RowBunch getNextBunch() {
         RowBunch rowBunch = null;
         int startY = -1;
         int cnt = 0;
@@ -134,15 +144,17 @@ public class BitsPool {
             }
             moveTopPartDown(rowBunch.getStartY(), rowBunch.getCnt());
         }
-        if(poolEventListener != null && result > 0){
-            poolEventListener.onAfterLinesErased(result);
+        if(erasingListener != null && result > 0){
+            erasingListener.onAfterLinesErased(result);
         }
     }
 
-    private void disposeLine(int y){
-        Map<Integer, BoxPoint> boxPoints = rowMap.get(y);
-        RenderEngine.getInstance().removeAll(boxPoints.values()); // todo fire event
-        boxPoints.clear();
+    public void setErasingListener(BitesPoolLinesErasingListener erasingListener) {
+        this.erasingListener = erasingListener;
+    }
+
+    public void setOverflowListener(BitesPoolOverflowListener overflowListener) {
+        this.overflowListener = overflowListener;
     }
 
     public boolean checkInPool(CompoundObj compoundObj) {
@@ -158,7 +170,7 @@ public class BitsPool {
                     for (BoxPoint point : compoundObj.getBoxPoints()) {
                         if (boxPoint.equals(point)) {
                             log.debug("In pool: {}", point);
-                            boxPoint.setInnerColor(Color.WHITE);
+                            boxPoint.setInnerColor(Color.yellow);
                             return true;
                         }
                     }
@@ -180,7 +192,7 @@ public class BitsPool {
                 if (boxPoint != null) {
                     for (BoxPoint point : compoundObj.getBoxPoints()) {
                         if (boxPoint.getX() == point.getX() && boxPoint.getY() == point.getY() + 1) {
-                            point.setInnerColor(Color.WHITE);
+                            point.setInnerColor(Color.yellow);
                             return true;
                         }
                     }
@@ -190,26 +202,44 @@ public class BitsPool {
         return false;
     }
 
+    private void disposeLine(int y){
+        Map<Integer, BoxPoint> boxPoints = rowMap.get(y);
+        RenderEngine.getInstance().removeAll(boxPoints.values()); // todo fire event
+        boxPoints.clear();
+    }
 
+    private void putAllBoxes(CompoundObj compoundObj){
+        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
+            put(boxPoint);
+        }
+    }
 
-    private List<BoxPoint> retrieveSection(int xGap, int yGap, int x, int y){
-        List<BoxPoint> r  = Collections.emptyList();
-        for (int i = Math.max(y - yGap,0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
-            for (int j = x - xGap; j <= x; j++) {
-                BoxPoint boxPoint = boxPoints.get(j);
-                if (boxPoint != null) {
-                    if(r == Collections.EMPTY_LIST){
-                        r = new ArrayList<>();
-                    }
-                    log.debug("found: {}", boxPoint);
-                    boxPoint.setInnerColor(Color.WHITE);
-                    r.add(boxPoint);
-                }
+    private void putYCorrectBoxes(CompoundObj compoundObj){
+        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
+            if(boxPoint.getY() >= 0){
+                put(boxPoint);
             }
         }
-        return r;
     }
+
+//    private List<BoxPoint> retrieveSection(int xGap, int yGap, int x, int y){
+//        List<BoxPoint> r  = Collections.emptyList();
+//        for (int i = Math.max(y - yGap,0); i <= y; i++) {
+//            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
+//            for (int j = x - xGap; j <= x; j++) {
+//                BoxPoint boxPoint = boxPoints.get(j);
+//                if (boxPoint != null) {
+//                    if(r == Collections.EMPTY_LIST){
+//                        r = new ArrayList<>();
+//                    }
+//                    log.debug("found: {}", boxPoint);
+//                    boxPoint.setInnerColor(Color.WHITE);
+//                    r.add(boxPoint);
+//                }
+//            }
+//        }
+//        return r;
+//    }
 
     public boolean checkGapsClash(int xGap, int yGap, int x, int y) {
         log.info("checking gap y [{},{}], x [{},{}]", y - yGap, y, x-xGap, x);
@@ -219,7 +249,7 @@ public class BitsPool {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
                     log.debug("clashed into: {}", boxPoint);
-                    boxPoint.setInnerColor(Color.WHITE);
+                    boxPoint.setInnerColor(Color.yellow);
                     return true;
                 }
             }
@@ -233,7 +263,7 @@ public class BitsPool {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("BitsPool{");
+        StringBuilder sb = new StringBuilder("BitesPool{");
         sb.append("\n");
         sb.append("\n--->");
         for (int i = 0; i < xCap; sb.append("(").append(i++).append(")")) ;
