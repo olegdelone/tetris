@@ -1,34 +1,41 @@
 package oov.tetris.proc;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 
 public class BitsPool {
-    private static transient Logger log = Logger.getLogger(BitsPool.class);
-    protected final Map<Integer, Map<Integer, BoxPoint>> baskets;
-    protected int xCap;
-    protected int yCap;
+    private static Logger log = LoggerFactory.getLogger(BitsPool.class);
+    final Map<Integer, Map<Integer, BoxPoint>> rowMap;
+    final BitesPoolEventListener poolEventListener;
+    final int xCap;
+    final int yCap;
+
+    public interface BitesPoolEventListener{
+        void onAfterLinesErased(int cnt);
+    }
 
 
-    public BitsPool(int xCap, int yCap) {
-        this.baskets = new HashMap<>(yCap);
+    public BitsPool(int xCap, int yCap, BitesPoolEventListener poolEventListener) {
+        this.rowMap = Maps.newLinkedHashMapWithExpectedSize(yCap);
+        this.poolEventListener = poolEventListener;
         for (int i = 0; i < yCap; i++) {
-            baskets.put(i, new HashMap<>());
+            rowMap.put(i, Maps.newHashMap());
         }
         this.xCap = xCap;
         this.yCap = yCap;
     }
 
     public void reset() {
-        for (Map<Integer, BoxPoint> pointMap : baskets.values()) {
+        for (Map<Integer, BoxPoint> pointMap : rowMap.values()) {
             pointMap.clear();
         }
     }
@@ -37,91 +44,105 @@ public class BitsPool {
         for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
             put(boxPoint);
         }
-        compoundObj.dispose();
-
+        compoundObj.deactivate();
     }
 
     public void put(BoxPoint boxPoint) {
-        baskets.get(boxPoint.getY()).put(boxPoint.getX(), boxPoint);
+        int x = boxPoint.getX();
+        int y = boxPoint.getY();
+        rowMap.get(y).put(x, boxPoint);
     }
 
-    Map<Integer, BoxPoint> getYHash(int y) {
-        return baskets.get(y);
+    public Map<Integer, BoxPoint> getRow(int y) {
+        return rowMap.get(y);
     }
-
 
     /**
-     * @param fromY     - current y
-     * @param stepsDown - from current to cur+steps
+     * @param fromYIndex     - current y
+     * @param stepsUp - from current to cur+steps
      */
-    void moveTopPartDown(int fromY, int stepsDown) {
-        Map[] tmpTop = new Map[stepsDown];
-        for (int y = fromY + stepsDown - 1, i = 0; y >= 0; y--) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(y);
-            if (y >= fromY) {
-//                if (!boxPoints.isEmpty()) { // todo
-//                    throw new IllegalStateException("!boxPoints.isEmpty()");
-//                }
-                tmpTop[i++] = boxPoints;
-                log.debug("line {} moved to tmp", y);
-            } else {
-                if (boxPoints != null) {
-                    for (BoxPoint boxPoint : boxPoints.values()) {
-                        boxPoint.addY(stepsDown);
-                    }
-                }
-                baskets.put(y + stepsDown, boxPoints);
-                log.debug("line {} shifted to {}", y, y + stepsDown);
-            }
+    public void moveTopPartDown(int fromYIndex, int stepsUp) {
+        List<Map<Integer, BoxPoint>> emptyMiddleRows = Lists.newArrayListWithExpectedSize(stepsUp);
+        for (int i = 0; i < stepsUp; i++) {
+            Map<Integer, BoxPoint> row = rowMap.remove(fromYIndex - i);
+            emptyMiddleRows.add(row);
+            log.debug("line {} moved to tmp", fromYIndex - i);
         }
-
-        for (int i = 0; i < tmpTop.length; baskets.put(i, tmpTop[i++])) ;
+        int y = fromYIndex - stepsUp;
+        Map<Integer, BoxPoint> row;
+        while (y >= 0 && !(row = rowMap.get(y)).isEmpty()) {
+            for (BoxPoint boxPoint : row.values()) {
+                boxPoint.addY(stepsUp);
+            }
+            rowMap.put(y + stepsUp, row);
+            log.debug("line {} shifted to {}", y, y + stepsUp);
+            y--;
+        }
+        y++; // step back
+        for (int i = 0; i < stepsUp; i++){
+            rowMap.put(i+y, emptyMiddleRows.get(i));
+            log.debug("line returned back to {}",i+y);
+        }
     }
 
+    public Map<Integer, Map<Integer, BoxPoint>> getYReadyForErase(){
+        Map<Integer, Map<Integer, BoxPoint>> result = Maps.newLinkedHashMap();
+        for (int y = yCap - 1; y >= 0; y--) { // down to up
+            Map<Integer, BoxPoint> row = rowMap.get(y);
+            if (xCap == row.size()) {
+                result.put(y, row);
+            }
+        }
+        return result;
+    }
 
-    private List<Integer> getNextBunch() {
-        List<Integer> r = Collections.emptyList();
-        Integer prev = null;
-        for (int i = yCap - 1; i >= 0; i--) {
-
-            Map<Integer, BoxPoint> boxPoints = baskets.get(i);
+    public RowBunch getNextBunch() {
+        RowBunch rowBunch = null;
+        int startY = -1;
+        int cnt = 0;
+        int prev = -1;
+        for (int y = yCap - 1; y >= 0; y--) { // down to up
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(y);
             if (boxPoints.isEmpty()) { // todo
                 break;
             }
             if (xCap == boxPoints.size()) {
-                if (r == Collections.EMPTY_LIST) {
-                    r = new ArrayList<Integer>(2);
+                if (prev == -1) {
+                    startY = prev = y;
                 }
-                if (prev == null) {
-                    prev = i;
-                }
-                if (prev - i > 1) {
+                if (prev - y > 1) { // chain broken
                     break;
-                } else {
-                    r.add(i);
-                    prev = i;
                 }
+                cnt++;
+                prev = y;
             }
         }
-        log.info("gotten next bunch: {}", r);
-        return r;
+        if(startY != -1){
+            rowBunch = new RowBunch(startY, cnt);
+        }
+        log.info("gotten next bunch: {}", rowBunch);
+        return rowBunch;
     }
 
-    public int eraseLines() {
-        List<Integer> r;
+    public void eraseLines() {
+        RowBunch rowBunch;
         int result = 0;
-        while ((r = getNextBunch()) != Collections.EMPTY_LIST) {
-            for (int i = 0; i < r.size(); i++, ++result) {
-                Integer y = r.get(i);
-                Map<Integer, BoxPoint> boxPoints = baskets.get(y);
-                RenderEngine.getInstance().removeAll(boxPoints.values());
-                boxPoints.clear();
-                if (i == r.size() - 1) {
-                    moveTopPartDown(y, r.size());
-                }
+        while ((rowBunch = getNextBunch()) != null) {
+            int y = rowBunch.getStartY();
+            for (int i = 0; i < rowBunch.getCnt(); i++, ++result) {
+                disposeLine(y - i);
             }
+            moveTopPartDown(rowBunch.getStartY(), rowBunch.getCnt());
         }
-        return result;
+        if(poolEventListener != null && result > 0){
+            poolEventListener.onAfterLinesErased(result);
+        }
+    }
+
+    private void disposeLine(int y){
+        Map<Integer, BoxPoint> boxPoints = rowMap.get(y);
+        RenderEngine.getInstance().removeAll(boxPoints.values()); // todo fire event
+        boxPoints.clear();
     }
 
     public boolean checkInPool(CompoundObj compoundObj) {
@@ -130,7 +151,7 @@ public class BitsPool {
         int x = compoundObj.getCursor().getX();
         int y = compoundObj.getCursor().getY();
         for (int i = Math.max(y - yGap,0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(i);
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
             for (int j = x - xGap; j <= x; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
@@ -153,7 +174,7 @@ public class BitsPool {
         int x = compoundObj.getCursor().getX();
         int y = compoundObj.getCursor().getY() + 1;
         for (int i = Math.max(y - yGap, 0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(i);
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
             for (int j = x - xGap; j <= x; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
@@ -169,10 +190,12 @@ public class BitsPool {
         return false;
     }
 
+
+
     private List<BoxPoint> retrieveSection(int xGap, int yGap, int x, int y){
         List<BoxPoint> r  = Collections.emptyList();
         for (int i = Math.max(y - yGap,0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(i);
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
             for (int j = x - xGap; j <= x; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
@@ -191,7 +214,7 @@ public class BitsPool {
     public boolean checkGapsClash(int xGap, int yGap, int x, int y) {
         log.info("checking gap y [{},{}], x [{},{}]", y - yGap, y, x-xGap, x);
         for (int i = Math.max(y - yGap,0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(i);
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
             for (int j = x - xGap; j <= x; j++) {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
@@ -204,10 +227,8 @@ public class BitsPool {
         return false;
     }
 
-
     public boolean checkInPool(int x, int y) {
-        Map<Integer, BoxPoint> pointMap = baskets.get(y);
-        return pointMap != null && pointMap.get(x) != null;
+        return rowMap.get(y).get(x) != null;
     }
 
     @Override
@@ -218,7 +239,7 @@ public class BitsPool {
         for (int i = 0; i < xCap; sb.append("(").append(i++).append(")")) ;
         sb.append("\n");
         for (int j = 0; j < yCap; j++) {
-            Map<Integer, BoxPoint> boxPoints = baskets.get(j);
+            Map<Integer, BoxPoint> boxPoints = rowMap.get(j);
             sb.append("(").append(j).append(") ");
 
             for (int i = 0; i < xCap; i++) {

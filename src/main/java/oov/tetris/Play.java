@@ -1,7 +1,7 @@
 package oov.tetris;
 
 import oov.tetris.draw.Drawable;
-import oov.tetris.proc.GameController;
+import oov.tetris.draw.controller.GameController;
 import oov.tetris.proc.RenderEngine;
 import oov.tetris.util.AppProperties;
 import org.slf4j.Logger;
@@ -16,7 +16,7 @@ import java.awt.image.BufferedImage;
 public class Play {
 
     private static volatile boolean paused = false;
-    private static transient Logger log = LoggerFactory.getLogger(Play.class);
+    private static Logger log = LoggerFactory.getLogger(Play.class);
     private final static int GAME_TIME = 100; // todo level parametrized
 
     private static final int w = Integer.valueOf(AppProperties.get("canvas.width"));
@@ -93,40 +93,15 @@ public class Play {
             }
 
         }
-
-//        try {
-//        } catch (IllegalStateException e) {
-//            Thread thread = RenderEngine.getInstance().stop();
-//            try {
-//                if (thread.isAlive()) {
-//                    log.info("joining to the thread...");
-//                    thread.join();
-//                    log.info("join released...");
-//                }
-//            } catch (InterruptedException e1) {
-//                log.warn("join interrupted.", e1);
-//            }
-//            RenderEngine.getInstance().fullRender();
-//            log.error("e: ", e);
-//            Color bgColor = Color.WHITE;
-//            Graphics gr = image.getGraphics();
-//            gr.setColor(bgColor);
-//            gr.drawString("Game over", w >> 1, h >> 1);
-//            render();
-//        }
-
     }
 
     public static void overTheGame() {
         paused = true;
-        RenderEngine.getInstance().add(new Drawable() {
-            @Override
-            public void draw(Graphics g, int x, int y) {
-                Color bgColor = Color.WHITE;
-                Graphics gr = image.getGraphics();
-                gr.setColor(bgColor);
-                gr.drawString("Game over", w >> 1, h >> 1);
-            }
+        RenderEngine.getInstance().add(g -> {
+            Color bgColor = Color.WHITE;
+            Graphics gr = image.getGraphics();
+            gr.setColor(bgColor);
+            gr.drawString("Game over", w >> 1, h >> 1);
         });
     }
 

@@ -1,42 +1,48 @@
 package oov.tetris.draw.item;
 
 import oov.tetris.draw.BoxPoint;
+import oov.tetris.draw.view.AncorControl;
+import oov.tetris.proc.RenderEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.Collections;
 
 
-public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
-    private static transient Logger log = LoggerFactory.getLogger(CompoundObj.class);
-
+public abstract class CompoundObj extends AncorControl implements Moveable, Rotateable, Cloneable {
+    private static Logger log = LoggerFactory.getLogger(CompoundObj.class);
     private int xGap;
     private int yGap;
     private BoxPoint cursor;
     private BoxPoint[] boxPoints;
-
-
+    protected Color color;
 
     protected CompoundObj(int x, int y, Color color, int cellW, int cellH) {
         boxPoints = obtainFigure(x, y, color, cellW, cellH);
         this.cursor = BoxPoint.makeBoxPoint(x, y, Color.PINK, cellW, cellH);
         xGap = initXGap();
         yGap = initYGap();
+        this.color = color;
     }
 
     protected abstract BoxPoint[] obtainFigure(int x, int y, Color color, int cellW, int cellH);
 
-
-
-    public int getxGap() {
-        return xGap;
+    @Override
+    public void setAncor(Point ancor) {
+        super.setAncor(ancor);
+        cursor.setAncor(ancor);
+        for (BoxPoint boxPoint : boxPoints) {
+            boxPoint.setAncor(ancor);
+        }
     }
 
-    public int getyGap() {
-        return yGap;
+    @Override
+    public void draw(Graphics g) {
+        for (BoxPoint boxPoint : boxPoints) {
+            boxPoint.draw(g);
+        }
     }
-
-
 
     @Override
     public void rotateCCW() {
@@ -153,8 +159,12 @@ public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
         cursor.setY(y);
     }
 
-    public void dispose() {
+    public void deactivate() {
         cursor = null;
+        RenderEngine.getInstance().removeAll(Collections.singleton(this));
+        for (BoxPoint boxPoint : boxPoints) {
+            RenderEngine.getInstance().add(boxPoint);
+        }
     }
 
     @Override
@@ -194,21 +204,29 @@ public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
         return sb.append("}").toString();
     }
 
+    public int getxGap() {
+        return xGap;
+    }
+
+    public int getyGap() {
+        return yGap;
+    }
 
     public int getOrigCPX() {
         return cursor.getX();
     }
 
-
     public BoxPoint getCursor() {
         return cursor;
     }
-
 
     public BoxPoint[] getBoxPoints() {
         return boxPoints;
     }
 
+    boolean isFlat() {
+        return getxGap() > getyGap();
+    }
 
     private int initXGap(){
         BoxPoint[] arr = boxPoints;
@@ -236,9 +254,6 @@ public abstract class CompoundObj implements Moveable, Rotateable, Cloneable {
         return cursor.getY() - minY;
     }
 
-    boolean isFlat() {
-        return getxGap() > getyGap();
-    }
 
     private void swapGaps() {
         int tmp = getxGap();

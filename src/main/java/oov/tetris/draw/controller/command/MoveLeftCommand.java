@@ -1,24 +1,21 @@
-package oov.tetris.proc.command;
+package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.proc.BitsPool;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Created by olegdelone on 22.08.2015.
- */
-public class MoveRightCommand implements CtrlCommand {
-    private static transient Logger log = Logger.getLogger(MoveRightCommand.class);
+
+public class MoveLeftCommand implements CtrlCommand {
+    private static Logger log = LoggerFactory.getLogger(MoveLeftCommand.class);
 
     private final BitsPool bitsPool;
     private final CompoundObj compoundObj;
-    private final int cx;
 
-    public MoveRightCommand(BitsPool bitsPool, CompoundObj compoundObj, int cx) {
+    public MoveLeftCommand(BitsPool bitsPool, CompoundObj compoundObj) {
         this.bitsPool = bitsPool;
         this.compoundObj = compoundObj;
-        this.cx = cx;
     }
 
     @Override
@@ -28,8 +25,8 @@ public class MoveRightCommand implements CtrlCommand {
         int cy = cursor.getY();
         int xGap = compoundObj.getxGap();
         int yGap = compoundObj.getyGap();
-        if (cx < this.cx - 1) {
-            if (bitsPool.checkGapsClash(xGap, yGap, cx+1, cy)) {
+        if (cx - xGap > 0) {
+            if (bitsPool.checkGapsClash(xGap, yGap, cx-1, cy)) {
 //                log.debug("gaps clashed");
                 CompoundObj cloned;
                 try {
@@ -37,12 +34,12 @@ public class MoveRightCommand implements CtrlCommand {
                 } catch (CloneNotSupportedException e) {
                     throw new RuntimeException(e);
                 }
-                cloned.moveRight();
+                cloned.moveLeft(1);
                 if (!bitsPool.checkInPool(cloned)) {
-                    compoundObj.moveRight();
+                    compoundObj.moveLeft();
                 }
             } else {
-                compoundObj.moveRight();
+                compoundObj.moveLeft();
             }
         }
     }

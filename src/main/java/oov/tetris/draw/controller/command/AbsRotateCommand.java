@@ -1,15 +1,14 @@
-package oov.tetris.proc.command;
+package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.proc.BitsPool;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/**
- * Created by olegdelone on 20.08.2015.
- */
+
 public abstract class AbsRotateCommand implements CtrlCommand {
-    private static transient Logger log = Logger.getLogger(AbsRotateCommand.class);
+    private static Logger log = LoggerFactory.getLogger(AbsRotateCommand.class);
 
     private final BitsPool bitsPool;
     private final CompoundObj compoundObj;

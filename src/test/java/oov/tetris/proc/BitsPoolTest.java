@@ -3,20 +3,19 @@ package oov.tetris.proc;
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.util.Logger;
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created by Olegdelone on 14.08.2015.
- */
 public class BitsPoolTest {
-    private static transient Logger log = Logger.getLogger(BitsPoolTest.class);
+
+    private static Logger log = LoggerFactory.getLogger(BitsPoolTest.class);
 
     @Test
     public void pt1() {
@@ -29,7 +28,7 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap);
+        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {
@@ -80,7 +79,7 @@ public class BitsPoolTest {
 
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap);
+        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
 
         //-------------------------
 
@@ -104,7 +103,7 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap);
+        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {
@@ -118,16 +117,16 @@ public class BitsPoolTest {
 
         Map<Integer, Map<Integer, BoxPoint>> snapshot = new HashMap<Integer, Map<Integer, BoxPoint>>(10);
         for (int i = 0; i < 10; i++) {
-            snapshot.put(i, bitsPool.getYHash(i));
+            snapshot.put(i, bitsPool.getRow(i));
         }
-        Map<Integer, BoxPoint> y0 = bitsPool.getYHash(0);
+        Map<Integer, BoxPoint> y0 = bitsPool.getRow(0);
         bitsPool.moveTopPartDown(7, 1);
         log.info("after {}", bitsPool);
         for (int i = 0; i < 10; i++) {
             if (i >= 1 && i <= 7) {
-                Assert.assertTrue(snapshot.get(i - 1) == bitsPool.getYHash(i));
+                Assert.assertTrue(snapshot.get(i - 1) == bitsPool.getRow(i));
             } else {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getYHash(i));
+                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i));
             }
         }
         //-------------------------
@@ -147,7 +146,7 @@ public class BitsPoolTest {
         }};
 
         int yCap = 10, xCap = 10;
-        BitsPool bitsPool = new BitsPool(xCap, yCap);
+        BitsPool bitsPool = new BitsPool(xCap, yCap, null);
         for (int i = 0; i < yCap; i++) {
             bitsPool.put(new BoxPoint(i, i, null, null, 0, 0));
         }
@@ -164,20 +163,20 @@ public class BitsPoolTest {
 
         Map<Integer, Map<Integer, BoxPoint>> snapshot = new HashMap<Integer, Map<Integer, BoxPoint>>(10);
         for (int i = 0; i < yCap; i++) {
-            snapshot.put(i, bitsPool.getYHash(i));
+            snapshot.put(i, bitsPool.getRow(i));
         }
-        Map<Integer, BoxPoint> y0 = bitsPool.getYHash(0);
+        Map<Integer, BoxPoint> y0 = bitsPool.getRow(0);
         bitsPool.moveTopPartDown(4, 2);
         log.info("after {}", bitsPool);
         for (int i = 0; i <= 3; i++) {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getYHash(i+2));
+                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i+2));
         }
 
         for (int i = 6; i <= yCap; i++) {
-                Assert.assertTrue(snapshot.get(i) == bitsPool.getYHash(i));
+                Assert.assertTrue(snapshot.get(i) == bitsPool.getRow(i));
         }
-        Assert.assertTrue(snapshot.get(4) == bitsPool.getYHash(1));
-        Assert.assertTrue(snapshot.get(5) == bitsPool.getYHash(0));
+        Assert.assertTrue(snapshot.get(4) == bitsPool.getRow(1));
+        Assert.assertTrue(snapshot.get(5) == bitsPool.getRow(0));
         //-------------------------
 
     }
@@ -266,7 +265,7 @@ public class BitsPoolTest {
         }};
         int yCap = 10, xCap = 10;
 
-        BitsPool bPool1 = new BitsPool(xCap,yCap);
+        BitsPool bPool1 = new BitsPool(xCap,yCap, null);
         for (int i = 0; i < yCap; i++) {
             if (filled.contains(i)) {
                 for (int j = 0; j < xCap; j++) {

@@ -1,17 +1,12 @@
 package oov.tetris;
 
-import oov.tetris.util.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.naming.NamingException;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * Created by Olegdelone on 21.07.2015.
- */
 public class JndiTest {
-    private static transient Logger log = Logger.getLogger(JndiTest.class);
+    private static Logger log = LoggerFactory.getLogger(JndiTest.class);
 
     class A{};
     class B extends A{};

@@ -1,14 +1,15 @@
-package oov.tetris.draw.menu;
+package oov.tetris.draw.view;
 
-import oov.tetris.draw.Drawable;
+import oov.tetris.proc.BitsPool;
+import oov.tetris.util.ScoresUtils;
 
 import java.awt.*;
 
 
-public class TextMenu extends Drawable {
+public class TextMenu extends AncorControl implements BitsPool.BitesPoolEventListener{
 
     private int scores;
-    private int level;
+    private int level = 1;
     private boolean paused;
     private int w;
     private int h;
@@ -29,8 +30,9 @@ public class TextMenu extends Drawable {
     }
 
     @Override
-    public void draw(Graphics g, int x, int y) {
-
+    public void draw(Graphics g) {
+        int x = getAncor().x;
+        int y = getAncor().y;
         g.setColor(color);
         g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
         int yMid = h>>2;
@@ -52,11 +54,17 @@ public class TextMenu extends Drawable {
     public void addScores(int scores) {
         this.scores += scores;
     }
-    public void nextLevel() {
+
+    public void incLevel() {
         this.level++;
     }
 
     public void setPaused(boolean paused) {
         this.paused = paused;
+    }
+
+    @Override
+    public void onAfterLinesErased(int linesCnt) {
+        addScores(ScoresUtils.calcAndGetScores(linesCnt));
     }
 }

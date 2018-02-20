@@ -1,4 +1,4 @@
-package oov.tetris.proc.command;
+package oov.tetris.draw.controller.command;
 
 /**
  * Created by olegdelone on 20.08.2015.

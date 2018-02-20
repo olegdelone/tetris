@@ -1,32 +1,22 @@
-package oov.tetris.draw.menu;
+package oov.tetris.draw.view;
 
-import oov.tetris.draw.BoxPoint;
-import oov.tetris.draw.Drawable;
-import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.item.CompoundObj;
+import oov.tetris.proc.FiguresStack;
 import oov.tetris.proc.RenderEngine;
 
 import java.awt.*;
 
 
-public class Cells extends Drawable implements TetrisControl {
+public class PlayDesk extends AncorControl implements FiguresStack.ChunksStackManagerCurrentListener {
     private final int cellW;
     private final int cellH;
-    protected final int xCapacity;
-    private final int yCapacity;
+    final int xCapacity;
+    final int yCapacity;
     private final int w;
     private final int h;
     private final Color borderColor;
 
-    public int getCellW() {
-        return cellW;
-    }
-
-    public int getCellH() {
-        return cellH;
-    }
-
-    public Cells(int xCapacity, int yCapacity, int w, int h, Color borderColor) {
+    public PlayDesk(int xCapacity, int yCapacity, int w, int h, Color borderColor) {
         this.cellW = w/xCapacity;
         this.cellH = h/yCapacity;
         this.w = w;
@@ -36,26 +26,26 @@ public class Cells extends Drawable implements TetrisControl {
         this.borderColor = borderColor;
     }
 
-    public int getW() {
-        return w;
+    public PlayDesk(int cellW, int cellH, Color borderColor, int xCapacity, int yCapacity) {
+        this.w = xCapacity*cellW;
+        this.h = yCapacity*cellH;
+        this.xCapacity = xCapacity;
+        this.yCapacity = yCapacity;
+        this.borderColor = borderColor;
+        this.cellW = cellW;
+        this.cellH = cellH;
     }
 
-    public int getH() {
-        return h;
+    public void placeObj(CompoundObj compoundObj){
+        compoundObj.setAncor(getAncor());
+        RenderEngine.getInstance().add(compoundObj);
+        postShift(compoundObj);
     }
-
-    public void addNextCurrentObject(CompoundObj compoundObj){
-        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
-            boxPoint.setTetrisControl(this);
-            RenderEngine.getInstance().add(boxPoint);
-        }
-        compoundObj.getCursor().setTetrisControl(this);
-    }
-
-
 
     @Override
-    public void draw(Graphics g, int sx, int sy) {
+    public void draw(Graphics g) {
+        int sx = getAncor().x;
+        int sy = getAncor().y;
         g.setColor(borderColor);
         int yMax = cellH * yCapacity;
         int xMax = cellW * xCapacity;
@@ -77,11 +67,25 @@ public class Cells extends Drawable implements TetrisControl {
         }
     }
 
-
     @Override
-    public Point getShiftPoint(Drawable drawable) {
-        return tetrisControl.getShiftPoint(this);
+    public void onObjIsReady(CompoundObj current) {
+        placeObj(current);
     }
 
+    public int getCellW() {
+        return cellW;
+    }
+    public int getCellH() {
+        return cellH;
+    }
+    public int getW() {
+        return w;
+    }
+    public int getH() {
+        return h;
+    }
 
+    protected void postShift(CompoundObj compoundObj){
+        compoundObj.moveTo(xCapacity >> 1, 0);
+    }
 }

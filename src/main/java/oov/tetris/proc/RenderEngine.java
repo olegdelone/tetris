@@ -2,17 +2,16 @@ package oov.tetris.proc;
 
 import com.google.common.collect.Lists;
 import oov.tetris.draw.Drawable;
-import oov.tetris.util.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.text.DecimalFormat;
 import java.util.Collection;
 
 
 public class RenderEngine implements Runnable {
-    private static transient Logger log = Logger.getLogger(RenderEngine.class);
+    private static Logger log = LoggerFactory.getLogger(RenderEngine.class);
+
     private static volatile RenderEngine instance;
-//    private volatile float fps;
     private final static int SECOND = 1000;
     private final static int FPS_TIME = SECOND / 5;
     private final static int RENDER_TIME = SECOND / 25;
@@ -36,12 +35,10 @@ public class RenderEngine implements Runnable {
         }
     }
 
-    public boolean remove(Drawable drawable) {
-        return drawables.remove(drawable);
-    }
-
     public boolean removeAll(Collection<? extends Drawable> drawable) {
-        return drawables.removeAll(drawable);
+        synchronized (drawables) {
+            return drawables.removeAll(drawable);
+        }
     }
 
     public Thread stop() {

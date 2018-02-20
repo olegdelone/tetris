@@ -1,4 +1,4 @@
-package oov.tetris.proc.command;
+package oov.tetris.draw.controller.command;
 
 import oov.tetris.draw.item.CompoundObj;
 import oov.tetris.proc.BitsPool;

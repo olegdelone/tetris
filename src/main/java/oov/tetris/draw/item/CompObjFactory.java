@@ -9,6 +9,14 @@ public class CompObjFactory {
     private static final Color[] COLORS = {Color.GREEN, Color.RED, Color.BLUE, Color.ORANGE, Color.MAGENTA};
     private static final Random RANDOM = new Random();
 
+    private final int cellW;
+    private final int cellH;
+
+    public CompObjFactory(int cellW, int cellH) {
+        this.cellW = cellW;
+        this.cellH = cellH;
+    }
+
     public enum PART {
         I, J, L, O, S, T, Z;
 
@@ -48,15 +56,22 @@ public class CompObjFactory {
                 result = new Zobj(x, y, color, cellW, cellH);
                 break;
             default:
-                throw new RuntimeException("something wrong with factory method");
+                throw new RuntimeException("unsupported type: " + part);
+        }
+        if(RANDOM.nextBoolean()){
+            result.rotateCW();
         }
         return result;
 
     }
 
-    public static CompoundObj makeRandObj(int x, int y, int cellW, int cellH) {
+    public CompoundObj makeRandObjAt(int x, int y) {
         PART p = PART.getRand();
 //        PART p = PART.I;
         return makeRandColorObj(x, y, cellW, cellH, p);
+    }
+
+    public CompoundObj makeRandObj() {
+        return makeRandObjAt(0, 0);
     }
 }
