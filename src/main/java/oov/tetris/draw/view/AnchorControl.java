@@ -6,17 +6,16 @@ import oov.tetris.draw.Drawable;
 import java.awt.*;
 
 
-public abstract class AncorControl implements Drawable {
+public abstract class AnchorControl implements Drawable {
     private final static Point ZERO_POINT = new Point(0, 0);
-    private Point ancor = ZERO_POINT;
+    private Point anchor = ZERO_POINT;
 
 //    private Point cachedPoint;
-//
 //    public void draw(Graphics g) {
 //        int sx, sy;
 //        Point point;
 //        if (cachedPoint == null) {
-//            if ((point = getAncor()) != null) {
+//            if ((point = getAnchor()) != null) {
 //                cachedPoint = point;
 //            } else {
 //                cachedPoint = ZERO_POINT;
@@ -27,13 +26,12 @@ public abstract class AncorControl implements Drawable {
 //
 //        draw(g, sx, sy);
 //    }
-//
 //    public abstract void draw(Graphics g, int x, int y);
 
-    public void setAncor(Point ancor){
-        this.ancor = ancor;
+    public void setAnchor(Point anchor){
+        this.anchor = anchor;
     }
-    public Point getAncor() {
-        return ancor;
+    public Point getAnchor() {
+        return anchor;
     }
 }

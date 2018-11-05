@@ -26,7 +26,6 @@ public class MoveDownCommand implements CtrlCommand {
     public void execute() {
         BoxPoint cursor = compoundObj.getCursor();
         if (cursor.getY() == cy - 1) {
-            bitesPool.put(compoundObj);
             objPutListener.onEvent(compoundObj);
         } else if (bitesPool.checkNextYInPool(compoundObj)) {
             log.debug("clash detected");
@@ -37,12 +36,9 @@ public class MoveDownCommand implements CtrlCommand {
                 throw new RuntimeException(e);
             }
             cloned.moveDown();
-
             if(bitesPool.checkInPool(cloned)){
-                bitesPool.put(compoundObj);
                 objPutListener.onEvent(compoundObj);
             } else {
-                bitesPool.put(cloned);
                 objPutListener.onEvent(cloned);
             }
         } else {

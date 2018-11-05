@@ -1,13 +1,13 @@
 package oov.tetris.draw;
 
-import oov.tetris.draw.view.AncorControl;
+import oov.tetris.draw.view.AnchorControl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 
 
-public class BoxPoint extends AncorControl implements Cloneable {
+public class BoxPoint extends AnchorControl implements Cloneable {
     private static Logger log = LoggerFactory.getLogger(BoxPoint.class);
 
     private Color borderColor;
@@ -59,8 +59,8 @@ public class BoxPoint extends AncorControl implements Cloneable {
 
     @Override
     public void draw(Graphics g) {
-        int sx = getAncor().x;
-        int sy = getAncor().y;
+        int sx = getAnchor().x;
+        int sy = getAnchor().y;
         if (point.y < 0) {
             return;
         }

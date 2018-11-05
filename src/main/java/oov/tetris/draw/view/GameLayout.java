@@ -44,7 +44,7 @@ public class GameLayout implements Drawable {
         int sy = remH;
 
         Point cellsSP = new Point(sx, sy);
-        playDesk.setAncor(cellsSP);
+        playDesk.setAnchor(cellsSP);
     }
 
     public void setPreviewDesk(PlayDesk rMenu) {
@@ -59,7 +59,7 @@ public class GameLayout implements Drawable {
             wPad = ((centerX-lMenu.getW())>>1);
         }
         Point rMenuSP = new Point(centerX + wPad, hPad);
-        rMenu.setAncor(rMenuSP);
+        rMenu.setAnchor(rMenuSP);
     }
 
     public void setTextMenu(TextMenu lMenu) {
@@ -73,6 +73,6 @@ public class GameLayout implements Drawable {
             wPad = ((centerX-lMenu.getW())>>1);
         }
         Point lMenuSP = new Point(wPad, hPad);
-        lMenu.setAncor(lMenuSP);
+        lMenu.setAnchor(lMenuSP);
     }
 }

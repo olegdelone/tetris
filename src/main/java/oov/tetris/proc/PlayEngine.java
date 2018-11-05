@@ -15,7 +15,7 @@ import java.util.Map;
 public class PlayEngine {
     private static transient Logger log = LoggerFactory.getLogger(PlayEngine.class);
     private static volatile PlayEngine instance;
-    private final static int GAME_TIME = 300;
+    private int gameStepMs = 300;
 
     private volatile boolean paused;
 
@@ -48,8 +48,9 @@ public class PlayEngine {
         playStepListeners.add(playStepListener);
     }
 
-
-
+    public void setGameStepMs(int gameStepMs) {
+        this.gameStepMs = gameStepMs;
+    }
 
     public void start() {
         initKeyMaps();
@@ -105,7 +106,7 @@ public class PlayEngine {
                 }
             }
             long timeCurrent = System.currentTimeMillis();
-            if (timeCurrent - timeStart >= GAME_TIME) {
+            if (timeCurrent - timeStart >= gameStepMs) {
                 notifyListeners();
                 timeStart = timeCurrent;
             }

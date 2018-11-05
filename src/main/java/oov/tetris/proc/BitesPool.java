@@ -7,9 +7,8 @@ import oov.tetris.draw.item.CompoundObj;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.Map;
 
 
 public class BitesPool {
@@ -18,16 +17,11 @@ public class BitesPool {
     final Map<Integer, Map<Integer, BoxPoint>> rowMap;
     final int xCap;
     final int yCap;
-    private BitesPoolLinesErasingListener erasingListener;
     private BitesPoolOverflowListener overflowListener;
 
-    public interface BitesPoolLinesErasingListener {
-        void onAfterLinesErased(int cnt);
-    }
     public interface BitesPoolOverflowListener {
         void onOverflown();
     }
-
 
     public BitesPool(int xCap, int yCap) {
         this.rowMap = Maps.newLinkedHashMapWithExpectedSize(yCap);
@@ -44,16 +38,18 @@ public class BitesPool {
         }
     }
 
+    public boolean checkIfFull(){
+        return !getRow(0).values().isEmpty();
+    }
+
     public void put(CompoundObj compoundObj) {
-        if(compoundObj.getCursor().getY() - compoundObj.getyGap() <= 0) {
+        putBoxes(compoundObj);
+        compoundObj.deactivate();
+        if(checkIfFull()) {
             if(overflowListener != null){
                 overflowListener.onOverflown();
             }
-            putYCorrectBoxes(compoundObj);
-        } else {
-            putAllBoxes(compoundObj);
         }
-        compoundObj.deactivate();
     }
 
 
@@ -134,7 +130,7 @@ public class BitesPool {
         return rowBunch;
     }
 
-    public void eraseLines() {
+    public int eraseLines() {
         RowBunch rowBunch;
         int result = 0;
         while ((rowBunch = getNextBunch()) != null) {
@@ -144,13 +140,7 @@ public class BitesPool {
             }
             moveTopPartDown(rowBunch.getStartY(), rowBunch.getCnt());
         }
-        if(erasingListener != null && result > 0){
-            erasingListener.onAfterLinesErased(result);
-        }
-    }
-
-    public void setErasingListener(BitesPoolLinesErasingListener erasingListener) {
-        this.erasingListener = erasingListener;
+        return result;
     }
 
     public void setOverflowListener(BitesPoolOverflowListener overflowListener) {
@@ -169,8 +159,8 @@ public class BitesPool {
                 if (boxPoint != null) {
                     for (BoxPoint point : compoundObj.getBoxPoints()) {
                         if (boxPoint.equals(point)) {
-                            log.debug("In pool: {}", point);
-                            boxPoint.setInnerColor(Color.yellow);
+//                            log.debug("In pool: {}", point);
+//                            boxPoint.setInnerColor(Color.yellow);
                             return true;
                         }
                     }
@@ -186,13 +176,13 @@ public class BitesPool {
         int x = compoundObj.getCursor().getX();
         int y = compoundObj.getCursor().getY() + 1;
         for (int i = Math.max(y - yGap, 0); i <= y; i++) {
-            Map<Integer, BoxPoint> boxPoints = rowMap.get(i);
+            Map<Integer, BoxPoint> row = rowMap.get(i);
             for (int j = x - xGap; j <= x; j++) {
-                BoxPoint boxPoint = boxPoints.get(j);
-                if (boxPoint != null) {
+                BoxPoint rowPoint = row.get(j);
+                if (rowPoint != null) {
                     for (BoxPoint point : compoundObj.getBoxPoints()) {
-                        if (boxPoint.getX() == point.getX() && boxPoint.getY() == point.getY() + 1) {
-                            point.setInnerColor(Color.yellow);
+                        if (rowPoint.getX() == point.getX() && rowPoint.getY() == point.getY() + 1) {
+//                            point.setInnerColor(Color.yellow);
                             return true;
                         }
                     }
@@ -208,13 +198,7 @@ public class BitesPool {
         boxPoints.clear();
     }
 
-    private void putAllBoxes(CompoundObj compoundObj){
-        for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
-            put(boxPoint);
-        }
-    }
-
-    private void putYCorrectBoxes(CompoundObj compoundObj){
+    private void putBoxes(CompoundObj compoundObj){
         for (BoxPoint boxPoint : compoundObj.getBoxPoints()) {
             if(boxPoint.getY() >= 0){
                 put(boxPoint);
@@ -249,7 +233,7 @@ public class BitesPool {
                 BoxPoint boxPoint = boxPoints.get(j);
                 if (boxPoint != null) {
                     log.debug("clashed into: {}", boxPoint);
-                    boxPoint.setInnerColor(Color.yellow);
+//                    boxPoint.setInnerColor(Color.yellow);
                     return true;
                 }
             }

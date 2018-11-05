@@ -3,10 +3,7 @@ package oov.tetris;
 import oov.tetris.draw.controller.GameController;
 import oov.tetris.draw.item.CompObjFactory;
 import oov.tetris.draw.view.*;
-import oov.tetris.proc.BitesPool;
-import oov.tetris.proc.FiguresStack;
-import oov.tetris.proc.PlayEngine;
-import oov.tetris.proc.RenderEngine;
+import oov.tetris.proc.*;
 import oov.tetris.util.AppProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +44,13 @@ public class Play {
         renderEngine.add(gameLayout);
 
         BitesPool bitesPool = new BitesPool(CAP_X, CAP_Y);
-        bitesPool.setErasingListener(textMenu);
-        final GameController gameController = initController(pdCellW, pdCellH, bitesPool, playDesk, previewDesk);
+        final GameController gameController = initController(pdCellW, pdCellH, bitesPool, playDesk, previewDesk, textMenu);
         PlayEngine playEngine = PlayEngine.getInstance();
         playEngine.addPlayStepListener(gameController::down);
         initKeys(playEngine, gameController);
 
-        AncorControl gameOver = new AnchorText("Game over", Color.WHITE);
-        gameOver.setAncor(new Point(W >> 1, H >> 1));
+        AnchorControl gameOver = new AnchorText("Game over", Color.WHITE);
+        gameOver.setAnchor(new Point(W >> 1, H >> 1));
 
         bitesPool.setOverflowListener(() -> {
             gameController.overTheGame();
@@ -76,18 +72,23 @@ public class Play {
         playEngine.addKeyCommand(KeyEvent.VK_LEFT, (KeyEvent e) -> gameController.rotateCCW());
         playEngine.addKeyCommand(KeyEvent.VK_Q, (KeyEvent e) -> gameController.rotateCCW());
 
+        playEngine.addKeyCommand(KeyEvent.VK_L, (KeyEvent e) -> gameController.cheatScores());// todo for test purposes only
+
         playEngine.addKeyCommand(KeyEvent.VK_P, e -> gameController.togglePause());
     }
 
     private static GameController initController(int cellW, int cellH, BitesPool bitesPool,
                                                  FiguresStack.ChunksStackManagerCurrentListener currentListener,
-                                                 FiguresStack.ChunksStackManagerOngoingListener ongoingListener) {
+                                                 FiguresStack.ChunksStackManagerOngoingListener ongoingListener,
+                                                 Player.PlayerInfoListener playerInfoListener) {
 
         CompObjFactory compObjFactory = new CompObjFactory(cellW, cellH);
         FiguresStack figuresStack = new FiguresStack(2, compObjFactory);
         figuresStack.setCurrentListener(currentListener);
         figuresStack.setOngoingListener(ongoingListener);
-        return new GameController(figuresStack, bitesPool, CAP_X, CAP_Y);
+        Player player = new Player();
+        player.setInfoListener(playerInfoListener);
+        return new GameController(player, figuresStack, bitesPool, CAP_X, CAP_Y);
     }
 
 

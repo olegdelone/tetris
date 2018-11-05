@@ -3,9 +3,8 @@ package oov.tetris.draw.controller;
 import oov.tetris.draw.BoxPoint;
 import oov.tetris.draw.controller.command.*;
 import oov.tetris.draw.item.CompoundObj;
-import oov.tetris.proc.BitesPool;
-import oov.tetris.proc.FiguresStack;
-import oov.tetris.proc.PlayEngine;
+import oov.tetris.proc.*;
+import oov.tetris.util.ScoresUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,20 +18,19 @@ public class GameController {
     private final PlayEngine playEngine;
     private volatile boolean paused;
     private CompoundObj currentObj;
+    private final Player player;
+    private final Rule rule;
 
 
-    public GameController(FiguresStack figuresStack, BitesPool bitesPool, int capX, int capY) {
+    public GameController(Player player, FiguresStack figuresStack, BitesPool bitesPool, int capX, int capY) {
+        this.player = player;
         playEngine = PlayEngine.getInstance();
         this.figuresStack = figuresStack;
         this.bitesPool = bitesPool;
         this.capX = capX;
         this.capY = capY;
+        this.rule = new Rule();
         roll();
-    }
-
-    private void roll(){
-        currentObj = figuresStack.next();
-        log.debug("obj: {}", currentObj);
     }
 
     public void right() {
@@ -56,8 +54,14 @@ public class GameController {
 
     public void down() {
         CtrlCommand command = new MoveDownCommand(bitesPool, currentObj, capY, compoundObj -> {
-            bitesPool.eraseLines();
-            roll();
+            bitesPool.put(compoundObj);
+            int cnt = bitesPool.eraseLines();
+            if(cnt > 0){
+                player.addScores(ScoresUtils.calcAndGetScores(cnt));
+            }
+            if(!bitesPool.checkIfFull()){
+                roll();
+            }
         });
         exec(command);
     }
@@ -82,6 +86,25 @@ public class GameController {
         if(!paused){
             togglePause();
         }
+    }
+
+    @Deprecated
+    public void cheatScores() {
+        player.addScores(300);
+        initLevel();
+    }
+
+    private void roll() {
+        initLevel();
+        currentObj = figuresStack.next();
+        log.debug("obj: {}", currentObj);
+    }
+
+    private void initLevel() {
+        int scores = player.getScores();
+        int level = rule.levelUponScores(scores);
+        player.setLevel(level);
+        playEngine.setGameStepMs(rule.msUponLevel(level));
     }
 
     private void exec(CtrlCommand ctrlCommand){

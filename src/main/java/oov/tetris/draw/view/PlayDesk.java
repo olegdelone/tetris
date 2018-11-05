@@ -7,7 +7,7 @@ import oov.tetris.proc.RenderEngine;
 import java.awt.*;
 
 
-public class PlayDesk extends AncorControl implements FiguresStack.ChunksStackManagerCurrentListener {
+public class PlayDesk extends AnchorControl implements FiguresStack.ChunksStackManagerCurrentListener {
     private final int cellW;
     private final int cellH;
     final int xCapacity;
@@ -37,15 +37,15 @@ public class PlayDesk extends AncorControl implements FiguresStack.ChunksStackMa
     }
 
     public void placeObj(CompoundObj compoundObj){
-        compoundObj.setAncor(getAncor());
-        RenderEngine.getInstance().add(compoundObj);
+        compoundObj.setAnchor(getAnchor());
         postShift(compoundObj);
+        RenderEngine.getInstance().add(compoundObj);
     }
 
     @Override
     public void draw(Graphics g) {
-        int sx = getAncor().x;
-        int sy = getAncor().y;
+        int sx = getAnchor().x;
+        int sy = getAnchor().y;
         g.setColor(borderColor);
         int yMax = cellH * yCapacity;
         int xMax = cellW * xCapacity;

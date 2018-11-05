@@ -32,7 +32,6 @@ public class FiguresStack {
         initOngoing();
     }
 
-
     public CompoundObj next() {
         CompoundObj compoundObj = stack.pop();
         if(currentListener != null){
@@ -64,6 +63,5 @@ public class FiguresStack {
     }
     public interface ChunksStackManagerCurrentListener {
         void onObjIsReady(CompoundObj current);
-
     }
 }

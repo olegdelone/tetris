@@ -1,15 +1,14 @@
 package oov.tetris.draw.view;
 
-import oov.tetris.proc.BitesPool;
-import oov.tetris.util.ScoresUtils;
+import oov.tetris.proc.Player;
 
 import java.awt.*;
 
 
-public class TextMenu extends AncorControl implements BitesPool.BitesPoolLinesErasingListener {
+public class TextMenu extends AnchorControl implements Player.PlayerInfoListener {
 
     private int scores;
-    private int level = 1;
+    private int level;
     private boolean paused;
     private int w;
     private int h;
@@ -31,8 +30,8 @@ public class TextMenu extends AncorControl implements BitesPool.BitesPoolLinesEr
 
     @Override
     public void draw(Graphics g) {
-        int x = getAncor().x;
-        int y = getAncor().y;
+        int x = getAnchor().x;
+        int y = getAnchor().y;
         g.setColor(color);
         g.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
         int yMid = h>>2;
@@ -51,20 +50,18 @@ public class TextMenu extends AncorControl implements BitesPool.BitesPoolLinesEr
         }
     }
 
-    public void addScores(int scores) {
-        this.scores += scores;
-    }
-
-    public void incLevel() {
-        this.level++;
-    }
 
     public void setPaused(boolean paused) {
         this.paused = paused;
     }
 
     @Override
-    public void onAfterLinesErased(int linesCnt) {
-        addScores(ScoresUtils.calcAndGetScores(linesCnt));
+    public void onScoresChanged(int scores) {
+        this.scores = scores;
+    }
+
+    @Override
+    public void onLevelChanged(int level) {
+        this.level = level;
     }
 }

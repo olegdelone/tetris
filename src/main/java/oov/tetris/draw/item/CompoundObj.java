@@ -1,7 +1,7 @@
 package oov.tetris.draw.item;
 
 import oov.tetris.draw.BoxPoint;
-import oov.tetris.draw.view.AncorControl;
+import oov.tetris.draw.view.AnchorControl;
 import oov.tetris.proc.RenderEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +10,7 @@ import java.awt.*;
 import java.util.Collections;
 
 
-public abstract class CompoundObj extends AncorControl implements Moveable, Rotateable, Cloneable {
+public abstract class CompoundObj extends AnchorControl implements Moveable, Rotateable, Cloneable {
     private static Logger log = LoggerFactory.getLogger(CompoundObj.class);
     private int xGap;
     private int yGap;
@@ -29,11 +29,11 @@ public abstract class CompoundObj extends AncorControl implements Moveable, Rota
     protected abstract BoxPoint[] obtainFigure(int x, int y, Color color, int cellW, int cellH);
 
     @Override
-    public void setAncor(Point ancor) {
-        super.setAncor(ancor);
-        cursor.setAncor(ancor);
+    public void setAnchor(Point anchor) {
+        super.setAnchor(anchor);
+        cursor.setAnchor(anchor);
         for (BoxPoint boxPoint : boxPoints) {
-            boxPoint.setAncor(ancor);
+            boxPoint.setAnchor(anchor);
         }
     }
 

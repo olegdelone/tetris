@@ -72,6 +72,6 @@ public class CompObjFactory {
     }
 
     public CompoundObj makeRandObj() {
-        return makeRandObjAt(0, 0);
+        return makeRandObjAt(0, -1);
     }
 }
